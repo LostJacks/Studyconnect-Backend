@@ -1,0 +1,25 @@
+stages:
+  - build
+  - test
+
+build:
+  stage: build
+  image: gradle:8.7-jdk17
+  script:
+    - chmod +x gradlew
+    - ./gradlew build -x test
+  artifacts:
+    paths:
+      - build/libs/
+
+test:
+  stage: test
+  image: gradle:8.7-jdk17
+  script:
+    - chmod +x gradlew
+    - ./gradlew test
+  artifacts:
+    when: always
+    paths:
+      - build/reports/tests/test/
+      - build/test-results/test/
