@@ -7,7 +7,7 @@ build_backend:
   tags:
     - local
   script:
-    - ./gradlew build -x test
+    - .\gradlew.bat build -x test
   artifacts:
     paths:
       - build/libs/
@@ -17,7 +17,7 @@ test_backend:
   tags:
     - local
   script:
-    - ./gradlew test
+    - .\gradlew.bat test
   artifacts:
     when: always
     paths:
