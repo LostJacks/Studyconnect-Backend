@@ -18,7 +18,10 @@ test_backend:
     - local
   script:
     - .\gradlew.bat test
-  artifacts:
+  artifacts:cd C:\Users\aweso\Downloads\studyconnects-main\studyconnects-main
+  git add .
+  git commit -m "Fix JAVA_HOME"
+  git push
     when: always
     paths:
       - build/reports/tests/test/
