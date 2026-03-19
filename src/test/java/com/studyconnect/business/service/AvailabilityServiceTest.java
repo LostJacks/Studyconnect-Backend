@@ -3,15 +3,17 @@ package com.studyconnect.business.service;
 import com.studyconnect.data.irepository.IAvailabilityRepository;
 import com.studyconnect.domain.model.AvailabilitySlot;
 import com.studyconnect.presentation.dto.CreateAvailabilityRequest;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
+import static org.mockito.ArgumentMatchers.*;
 
 class AvailabilityServiceTest {
 
@@ -20,7 +22,7 @@ class AvailabilityServiceTest {
 
     @BeforeEach
     void setUp() {
-        availabilityRepository = Mockito.mock(IAvailabilityRepository.class);
+        availabilityRepository = mock(IAvailabilityRepository.class);
         availabilityService = new AvailabilityService(availabilityRepository);
     }
 
@@ -48,6 +50,7 @@ class AvailabilityServiceTest {
 
         assertNotNull(result);
         assertEquals(1L, result.getHelperId());
+        verify(availabilityRepository, times(1)).save(any());
     }
 
     @Test
@@ -59,8 +62,57 @@ class AvailabilityServiceTest {
         request.setStartTime(LocalTime.of(12,0));
         request.setEndTime(LocalTime.of(10,0));
 
-        assertThrows(IllegalArgumentException.class, () -> {
-            availabilityService.createAvailability(request);
-        });
+        assertThrows(IllegalArgumentException.class, () ->
+                availabilityService.createAvailability(request)
+        );
+
+        verify(availabilityRepository, never()).save(any());
+    }
+
+    @Test
+    void createAvailability_nullRequest_throwsException() {
+
+        assertThrows(IllegalArgumentException.class, () ->
+                availabilityService.createAvailability(null)
+        );
+
+        verify(availabilityRepository, never()).save(any());
+    }
+
+    @Test
+    void createAvailability_missingField_throwsException() {
+
+        CreateAvailabilityRequest request = new CreateAvailabilityRequest();
+        request.setHelperId(1L);
+        request.setDate(null); // missing field
+        request.setStartTime(LocalTime.of(10,0));
+        request.setEndTime(LocalTime.of(12,0));
+
+        assertThrows(IllegalArgumentException.class, () ->
+                availabilityService.createAvailability(request)
+        );
+
+        verify(availabilityRepository, never()).save(any());
+    }
+
+    @Test
+    void getHelperAvailability_valid_returnsList() {
+
+        when(availabilityRepository.findByHelperId(1L)).thenReturn(List.of());
+
+        var result = availabilityService.getHelperAvailability(1L);
+
+        assertNotNull(result);
+        verify(availabilityRepository, times(1)).findByHelperId(1L);
+    }
+
+    @Test
+    void getHelperAvailability_null_throwsException() {
+
+        assertThrows(IllegalArgumentException.class, () ->
+                availabilityService.getHelperAvailability(null)
+        );
+
+        verify(availabilityRepository, never()).findByHelperId(any());
     }
 }
