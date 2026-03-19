@@ -2,12 +2,18 @@ stages:
   - build
   - test
 
+cache:
+  key: gradle-cache
+  paths:
+    - .gradle/wrapper/
+    - .gradle/caches/
+
 build_backend:
   stage: build
   tags:
     - local
   script:
-    - .\gradlew.bat build -x test
+    - .\gradlew.bat build -x test --build-cache --no-daemon
   artifacts:
     paths:
       - build/libs/
@@ -17,7 +23,7 @@ test_backend:
   tags:
     - local
   script:
-    - .\gradlew.bat test
+    - .\gradlew.bat test --build-cache --no-daemon
   artifacts:
     when: always
     paths:
