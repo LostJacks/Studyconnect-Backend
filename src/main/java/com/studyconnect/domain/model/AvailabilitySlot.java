@@ -1,4 +1,4 @@
-package com.studyconnect.domain.entity;
+package com.studyconnect.domain.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -10,9 +10,10 @@ import java.time.LocalTime;
 @AllArgsConstructor
 public class AvailabilitySlot {
 
+    private Long id;
     private Long helperId;
     private LocalDate date;
     private LocalTime startTime;
     private LocalTime endTime;
-
+    private boolean booked;
 }
