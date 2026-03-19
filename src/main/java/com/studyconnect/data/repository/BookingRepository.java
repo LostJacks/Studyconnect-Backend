@@ -5,6 +5,8 @@ import com.studyconnect.domain.model.BookingRequest;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalTime;
+
 @Repository
 public class BookingRepository implements IBookingRepository {
 
@@ -33,5 +35,27 @@ public class BookingRepository implements IBookingRepository {
         );
 
         return bookingRequest;
+    }
+
+    @Override
+    public boolean existsOverlappingBooking(Long slotId, LocalTime startTime, LocalTime endTime) {
+
+        String sql = """
+                SELECT COUNT(*)
+                FROM booking_request
+                WHERE slot_id = ?
+                  AND start_time < ?
+                  AND end_time > ?
+                """;
+
+        Integer count = jdbcTemplate.queryForObject(
+                sql,
+                Integer.class,
+                slotId,
+                endTime,   // IMPORTANT: flipped for overlap logic
+                startTime
+        );
+
+        return count != null && count > 0;
     }
 }

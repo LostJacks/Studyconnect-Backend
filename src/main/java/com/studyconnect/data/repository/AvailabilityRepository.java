@@ -55,4 +55,27 @@ public class AvailabilityRepository implements IAvailabilityRepository {
                 helperId
         );
     }
+
+    @Override
+    public AvailabilitySlot findById(Long id) {
+        String sql = """
+                SELECT id, helper_id, date, start_time, end_time, booked
+                FROM availability_slot
+                WHERE id = ?
+                """;
+
+        List<AvailabilitySlot> results = jdbcTemplate.query(sql, (rs, rowNum) ->
+                        new AvailabilitySlot(
+                                rs.getLong("id"),
+                                rs.getLong("helper_id"),
+                                rs.getDate("date").toLocalDate(),
+                                rs.getTime("start_time").toLocalTime(),
+                                rs.getTime("end_time").toLocalTime(),
+                                rs.getBoolean("booked")
+                        ),
+                id
+        );
+
+        return results.isEmpty() ? null : results.get(0);
+    }
 }
