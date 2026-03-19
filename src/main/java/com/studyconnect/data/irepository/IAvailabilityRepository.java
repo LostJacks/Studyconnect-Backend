@@ -9,3 +9,4 @@ public interface IAvailabilityRepository {
 
     List<AvailabilitySlot> findByHelperId(Long helperId);
 }
+//testpipeline//
