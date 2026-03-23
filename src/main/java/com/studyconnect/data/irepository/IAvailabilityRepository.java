@@ -8,7 +8,9 @@ public interface IAvailabilityRepository {
 
     AvailabilitySlot save(AvailabilitySlot slot);
 
-    List<AvailabilitySlot> findByHelperId(Long helperId);
+    List<AvailabilitySlot> findByTeacherId(Long helperId);
 
     AvailabilitySlot findById(Long id);
+
+    void markAsBooked(Long id);
 }

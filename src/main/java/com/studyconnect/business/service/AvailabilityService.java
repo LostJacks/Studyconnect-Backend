@@ -5,6 +5,9 @@ import com.studyconnect.domain.model.AvailabilitySlot;
 import com.studyconnect.presentation.dto.CreateAvailabilityRequest;
 import org.springframework.stereotype.Service;
 
+import java.time.Duration;
+import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -16,13 +19,13 @@ public class AvailabilityService {
         this.availabilityRepository = availabilityRepository;
     }
 
-    public AvailabilitySlot createAvailability(CreateAvailabilityRequest request) {
+    public List<AvailabilitySlot> createAvailability(CreateAvailabilityRequest request) {
 
         if (request == null) {
             throw new IllegalArgumentException("Request cannot be null");
         }
 
-        if (request.getHelperId() == null ||
+        if (request.getTeacherId() == null ||
                 request.getDate() == null ||
                 request.getStartTime() == null ||
                 request.getEndTime() == null) {
@@ -34,24 +37,42 @@ public class AvailabilityService {
             throw new IllegalArgumentException("Start time must be before end time");
         }
 
-        AvailabilitySlot slot = new AvailabilitySlot(
-                null,
-                request.getHelperId(),
-                request.getDate(),
-                request.getStartTime(),
-                request.getEndTime(),
-                false   // slot is available when created
-        );
+        long totalMinutes = Duration.between(request.getStartTime(), request.getEndTime()).toMinutes();
 
-        return availabilityRepository.save(slot);
-    }
-
-    public List<AvailabilitySlot> getHelperAvailability(Long helperId) {
-
-        if (helperId == null) {
-            throw new IllegalArgumentException("HelperId cannot be null");
+        if (totalMinutes % 30 != 0) {
+            throw new IllegalArgumentException("Time range must be divisible into 30-minute slots");
         }
 
-        return availabilityRepository.findByHelperId(helperId);
+        List<AvailabilitySlot> createdSlots = new ArrayList<>();
+        LocalTime currentStart = request.getStartTime();
+
+        while (currentStart.isBefore(request.getEndTime())) {
+            LocalTime currentEnd = currentStart.plusMinutes(30);
+
+            AvailabilitySlot slot = new AvailabilitySlot(
+                    null,
+                    request.getTeacherId(),
+                    request.getDate(),
+                    currentStart,
+                    currentEnd,
+                    false
+            );
+
+            AvailabilitySlot savedSlot = availabilityRepository.save(slot);
+            createdSlots.add(savedSlot);
+
+            currentStart = currentEnd;
+        }
+
+        return createdSlots;
+    }
+
+    public List<AvailabilitySlot> getTeacherAvailability(Long teacherId) {
+
+        if (teacherId == null) {
+            throw new IllegalArgumentException("TeacherId cannot be null");
+        }
+
+        return availabilityRepository.findByTeacherId(teacherId);
     }
 }

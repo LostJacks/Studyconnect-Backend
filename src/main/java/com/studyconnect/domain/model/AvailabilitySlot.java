@@ -11,7 +11,7 @@ import java.time.LocalTime;
 public class AvailabilitySlot {
 
     private Long id;
-    private Long helperId;
+    private Long teacherId;
     private LocalDate date;
     private LocalTime startTime;
     private LocalTime endTime;

@@ -18,17 +18,16 @@ public class AvailabilityController {
     }
 
     @PostMapping
-    public AvailabilitySlot createAvailability(
+    public List<AvailabilitySlot> createAvailability(
             @RequestBody CreateAvailabilityRequest request) {
 
         return availabilityService.createAvailability(request);
     }
 
-    @GetMapping("/helper/{helperId}")
-    public List<AvailabilitySlot> getHelperAvailability(
-            @PathVariable Long helperId) {
+    @GetMapping("/teacher/{teacherId}")
+    public List<AvailabilitySlot> getTeacherAvailability(
+            @PathVariable Long teacherId) {
 
-        return availabilityService.getHelperAvailability(helperId);
+        return availabilityService.getTeacherAvailability(teacherId);
     }
 }
-//testpipeline//

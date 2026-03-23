@@ -10,7 +10,7 @@ import java.time.LocalTime;
 @Setter
 public class CreateAvailabilityRequest {
 
-    private Long helperId;
+    private Long teacherId;
     private LocalDate date;
     private LocalTime startTime;
     private LocalTime endTime;

@@ -3,7 +3,6 @@ package com.studyconnect.business.service;
 import com.studyconnect.data.irepository.IAvailabilityRepository;
 import com.studyconnect.domain.model.AvailabilitySlot;
 import com.studyconnect.presentation.dto.CreateAvailabilityRequest;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -30,10 +29,10 @@ class AvailabilityServiceTest {
     void createAvailability_validRequest_returnsAvailabilitySlot() {
 
         CreateAvailabilityRequest request = new CreateAvailabilityRequest();
-        request.setHelperId(1L);
-        request.setDate(LocalDate.of(2026,3,12));
-        request.setStartTime(LocalTime.of(10,0));
-        request.setEndTime(LocalTime.of(12,0));
+        request.setTeacherId(1L);
+        request.setDate(LocalDate.of(2026, 3, 12));
+        request.setStartTime(LocalTime.of(10, 0));
+        request.setEndTime(LocalTime.of(12, 0));
 
         AvailabilitySlot savedSlot = new AvailabilitySlot(
                 1L,
@@ -49,7 +48,7 @@ class AvailabilityServiceTest {
         AvailabilitySlot result = availabilityService.createAvailability(request);
 
         assertNotNull(result);
-        assertEquals(1L, result.getHelperId());
+        assertEquals(1L, result.getTeacherId());
         verify(availabilityRepository, times(1)).save(any());
     }
 
@@ -57,10 +56,10 @@ class AvailabilityServiceTest {
     void createAvailability_startAfterEnd_throwsException() {
 
         CreateAvailabilityRequest request = new CreateAvailabilityRequest();
-        request.setHelperId(1L);
-        request.setDate(LocalDate.of(2026,3,12));
-        request.setStartTime(LocalTime.of(12,0));
-        request.setEndTime(LocalTime.of(10,0));
+        request.setTeacherId(1L);
+        request.setDate(LocalDate.of(2026, 3, 12));
+        request.setStartTime(LocalTime.of(12, 0));
+        request.setEndTime(LocalTime.of(10, 0));
 
         assertThrows(IllegalArgumentException.class, () ->
                 availabilityService.createAvailability(request)
@@ -83,10 +82,10 @@ class AvailabilityServiceTest {
     void createAvailability_missingField_throwsException() {
 
         CreateAvailabilityRequest request = new CreateAvailabilityRequest();
-        request.setHelperId(1L);
-        request.setDate(null); // missing field
-        request.setStartTime(LocalTime.of(10,0));
-        request.setEndTime(LocalTime.of(12,0));
+        request.setTeacherId(1L);
+        request.setDate(null);
+        request.setStartTime(LocalTime.of(10, 0));
+        request.setEndTime(LocalTime.of(12, 0));
 
         assertThrows(IllegalArgumentException.class, () ->
                 availabilityService.createAvailability(request)
@@ -96,23 +95,23 @@ class AvailabilityServiceTest {
     }
 
     @Test
-    void getHelperAvailability_valid_returnsList() {
+    void getTeacherAvailability_valid_returnsList() {
 
-        when(availabilityRepository.findByHelperId(1L)).thenReturn(List.of());
+        when(availabilityRepository.findByTeacherId(1L)).thenReturn(List.of());
 
-        var result = availabilityService.getHelperAvailability(1L);
+        var result = availabilityService.getTeacherAvailability(1L);
 
         assertNotNull(result);
-        verify(availabilityRepository, times(1)).findByHelperId(1L);
+        verify(availabilityRepository, times(1)).findByTeacherId(1L);
     }
 
     @Test
-    void getHelperAvailability_null_throwsException() {
+    void getTeacherAvailability_null_throwsException() {
 
         assertThrows(IllegalArgumentException.class, () ->
-                availabilityService.getHelperAvailability(null)
+                availabilityService.getTeacherAvailability(null)
         );
 
-        verify(availabilityRepository, never()).findByHelperId(any());
+        verify(availabilityRepository, never()).findByTeacherId(any());
     }
 }

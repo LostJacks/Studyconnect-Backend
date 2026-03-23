@@ -17,13 +17,18 @@ public class AvailabilityRepository implements IAvailabilityRepository {
     }
 
     @Override
-    public AvailabilitySlot save(AvailabilitySlot slot) {
+    public void markAsBooked(Long id) {
+        String sql = "UPDATE availability_slot SET booked = true WHERE id = ?";
+        jdbcTemplate.update(sql, id);
+    }
 
-        String sql = "INSERT INTO availability_slot (helper_id, date, start_time, end_time, booked) VALUES (?, ?, ?, ?, ?)";
+    @Override
+    public AvailabilitySlot save(AvailabilitySlot slot) {
+        String sql = "INSERT INTO availability_slot (teacher_id, date, start_time, end_time, booked) VALUES (?, ?, ?, ?, ?)";
 
         jdbcTemplate.update(
                 sql,
-                slot.getHelperId(),
+                slot.getTeacherId(),
                 slot.getDate(),
                 slot.getStartTime(),
                 slot.getEndTime(),
@@ -34,32 +39,31 @@ public class AvailabilityRepository implements IAvailabilityRepository {
     }
 
     @Override
-    public List<AvailabilitySlot> findByHelperId(Long helperId) {
-
+    public List<AvailabilitySlot> findByTeacherId(Long teacherId) {
         String sql = """
-                SELECT id, helper_id, date, start_time, end_time, booked
+                SELECT id, teacher_id, date, start_time, end_time, booked
                 FROM availability_slot
-                WHERE helper_id = ?
+                WHERE teacher_id = ?
                 AND booked = FALSE
                 """;
 
         return jdbcTemplate.query(sql, (rs, rowNum) ->
                         new AvailabilitySlot(
                                 rs.getLong("id"),
-                                rs.getLong("helper_id"),
+                                rs.getLong("teacher_id"),
                                 rs.getDate("date").toLocalDate(),
                                 rs.getTime("start_time").toLocalTime(),
                                 rs.getTime("end_time").toLocalTime(),
                                 rs.getBoolean("booked")
                         ),
-                helperId
+                teacherId
         );
     }
 
     @Override
     public AvailabilitySlot findById(Long id) {
         String sql = """
-                SELECT id, helper_id, date, start_time, end_time, booked
+                SELECT id, teacher_id, date, start_time, end_time, booked
                 FROM availability_slot
                 WHERE id = ?
                 """;
@@ -67,7 +71,7 @@ public class AvailabilityRepository implements IAvailabilityRepository {
         List<AvailabilitySlot> results = jdbcTemplate.query(sql, (rs, rowNum) ->
                         new AvailabilitySlot(
                                 rs.getLong("id"),
-                                rs.getLong("helper_id"),
+                                rs.getLong("teacher_id"),
                                 rs.getDate("date").toLocalDate(),
                                 rs.getTime("start_time").toLocalTime(),
                                 rs.getTime("end_time").toLocalTime(),
