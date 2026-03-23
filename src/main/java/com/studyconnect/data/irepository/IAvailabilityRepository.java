@@ -13,4 +13,5 @@ public interface IAvailabilityRepository {
     AvailabilitySlot findById(Long id);
 
     void markAsBooked(Long id);
+    void updateBookedStatus(Long slotId, boolean booked);
 }

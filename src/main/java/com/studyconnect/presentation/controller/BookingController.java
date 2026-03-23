@@ -19,4 +19,18 @@ public class BookingController {
     public BookingRequest createBooking(@RequestBody CreateBookingRequest request) {
         return bookingService.createBooking(request);
     }
+
+    @PutMapping("/{bookingId}/accept")
+    public BookingRequest acceptBooking(
+            @PathVariable Long bookingId,
+            @RequestParam Long teacherId) {
+        return bookingService.acceptBooking(bookingId, teacherId);
+    }
+
+    @PutMapping("/{bookingId}/reject")
+    public BookingRequest rejectBooking(
+            @PathVariable Long bookingId,
+            @RequestParam Long teacherId) {
+        return bookingService.rejectBooking(bookingId, teacherId);
+    }
 }

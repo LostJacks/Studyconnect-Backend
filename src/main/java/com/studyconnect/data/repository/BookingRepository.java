@@ -2,10 +2,14 @@ package com.studyconnect.data.repository;
 
 import com.studyconnect.data.irepository.IBookingRepository;
 import com.studyconnect.domain.model.BookingRequest;
+import com.studyconnect.domain.model.BookingStatus;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 
-import java.time.LocalTime;
+import java.sql.PreparedStatement;
+import java.sql.Statement;
 
 @Repository
 public class BookingRepository implements IBookingRepository {
@@ -20,42 +24,75 @@ public class BookingRepository implements IBookingRepository {
     public BookingRequest save(BookingRequest bookingRequest) {
         String sql = """
                 INSERT INTO booking_request
-                (slot_id, requester_id, start_time, end_time, title, description)
-                VALUES (?, ?, ?, ?, ?, ?)
+                (slot_id, requester_id, start_time, end_time, title, description, status)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
                 """;
 
-        jdbcTemplate.update(
-                sql,
+        KeyHolder keyHolder = new GeneratedKeyHolder();
+
+        jdbcTemplate.update(connection -> {
+            PreparedStatement ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+            ps.setLong(1, bookingRequest.getSlotId());
+            ps.setLong(2, bookingRequest.getRequesterId());
+            ps.setObject(3, bookingRequest.getStartTime());
+            ps.setObject(4, bookingRequest.getEndTime());
+            ps.setString(5, bookingRequest.getTitle());
+            ps.setString(6, bookingRequest.getDescription());
+            ps.setString(7, bookingRequest.getStatus().name());
+            return ps;
+        }, keyHolder);
+
+        Long generatedId = keyHolder.getKey() != null ? keyHolder.getKey().longValue() : null;
+
+        return new BookingRequest(
+                generatedId,
                 bookingRequest.getSlotId(),
                 bookingRequest.getRequesterId(),
                 bookingRequest.getStartTime(),
                 bookingRequest.getEndTime(),
                 bookingRequest.getTitle(),
-                bookingRequest.getDescription()
+                bookingRequest.getDescription(),
+                bookingRequest.getStatus()
         );
-
-        return bookingRequest;
     }
 
     @Override
-    public boolean existsOverlappingBooking(Long slotId, LocalTime startTime, LocalTime endTime) {
-
+    public BookingRequest findById(Long bookingId) {
         String sql = """
-                SELECT COUNT(*)
+                SELECT id, slot_id, requester_id, start_time, end_time, title, description, status
                 FROM booking_request
-                WHERE slot_id = ?
-                  AND start_time < ?
-                  AND end_time > ?
+                WHERE id = ?
                 """;
 
-        Integer count = jdbcTemplate.queryForObject(
+        return jdbcTemplate.query(
                 sql,
-                Integer.class,
-                slotId,
-                endTime,   // IMPORTANT: flipped for overlap logic
-                startTime
+                rs -> {
+                    if (rs.next()) {
+                        return new BookingRequest(
+                                rs.getLong("id"),
+                                rs.getLong("slot_id"),
+                                rs.getLong("requester_id"),
+                                rs.getTime("start_time").toLocalTime(),
+                                rs.getTime("end_time").toLocalTime(),
+                                rs.getString("title"),
+                                rs.getString("description"),
+                                BookingStatus.valueOf(rs.getString("status"))
+                        );
+                    }
+                    return null;
+                },
+                bookingId
         );
+    }
 
-        return count != null && count > 0;
+    @Override
+    public void updateStatus(Long bookingId, BookingStatus status) {
+        String sql = """
+                UPDATE booking_request
+                SET status = ?
+                WHERE id = ?
+                """;
+
+        jdbcTemplate.update(sql, status.name(), bookingId);
     }
 }

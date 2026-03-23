@@ -23,6 +23,18 @@ public class AvailabilityRepository implements IAvailabilityRepository {
     }
 
     @Override
+    public void updateBookedStatus(Long slotId, boolean booked) {
+
+        String sql = """
+            UPDATE availability_slot
+            SET booked = ?
+            WHERE id = ?
+            """;
+
+        jdbcTemplate.update(sql, booked, slotId);
+    }
+
+    @Override
     public AvailabilitySlot save(AvailabilitySlot slot) {
         String sql = "INSERT INTO availability_slot (teacher_id, date, start_time, end_time, booked) VALUES (?, ?, ?, ?, ?)";
 

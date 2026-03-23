@@ -16,5 +16,6 @@ public class BookingRequest {
     private LocalTime endTime;
     private String title;
     private String description;
+    private BookingStatus status;
 
 }
