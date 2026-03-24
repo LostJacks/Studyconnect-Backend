@@ -1,23 +1,29 @@
-stages:
+.stages:
   - build
   - test
 
-build:
+cache:
+  key: gradle-cache
+  paths:
+    - .gradle/wrapper/
+    - .gradle/caches/
+
+build_backend:
   stage: build
-  image: gradle:8.7-jdk17
+  tags:
+    - local
   script:
-    - chmod +x gradlew
-    - ./gradlew build -x test
+    - .\gradlew.bat build -x test --build-cache --no-daemon
   artifacts:
     paths:
       - build/libs/
 
-test:
+test_backend:
   stage: test
-  image: gradle:8.7-jdk17
+  tags:
+    - local
   script:
-    - chmod +x gradlew
-    - ./gradlew test
+    - .\gradlew.bat test --build-cache --no-daemon
   artifacts:
     when: always
     paths:
