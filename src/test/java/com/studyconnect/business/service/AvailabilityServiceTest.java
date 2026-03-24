@@ -45,7 +45,7 @@ class AvailabilityServiceTest {
 
         when(availabilityRepository.save(any())).thenReturn(savedSlot);
 
-        AvailabilitySlot result = availabilityService.createAvailability(request);
+        List<AvailabilitySlot> result = availabilityService.createAvailability(request);
 
         assertNotNull(result);
         assertEquals(1L, result.getTeacherId());
