@@ -11,8 +11,8 @@ import java.time.LocalTime;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
-import static org.mockito.ArgumentMatchers.*;
 
 class AvailabilityServiceTest {
 
@@ -26,7 +26,7 @@ class AvailabilityServiceTest {
     }
 
     @Test
-    void createAvailability_validRequest_returnsAvailabilitySlot() {
+    void createAvailability_validRequest_returnsAvailabilitySlots() {
 
         CreateAvailabilityRequest request = new CreateAvailabilityRequest();
         request.setTeacherId(1L);
@@ -34,22 +34,34 @@ class AvailabilityServiceTest {
         request.setStartTime(LocalTime.of(10, 0));
         request.setEndTime(LocalTime.of(12, 0));
 
-        AvailabilitySlot savedSlot = new AvailabilitySlot(
-                1L,
-                1L,
-                request.getDate(),
-                request.getStartTime(),
-                request.getEndTime(),
-                false
-        );
-
-        when(availabilityRepository.save(any())).thenReturn(savedSlot);
+        when(availabilityRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
 
         List<AvailabilitySlot> result = availabilityService.createAvailability(request);
 
         assertNotNull(result);
-        assertEquals(1L, result.getTeacherId());
-        verify(availabilityRepository, times(1)).save(any());
+        assertEquals(4, result.size());
+
+        assertEquals(1L, result.get(0).getTeacherId());
+        assertEquals(LocalTime.of(10, 0), result.get(0).getStartTime());
+        assertEquals(LocalTime.of(10, 30), result.get(0).getEndTime());
+        assertFalse(result.get(0).isBooked());
+
+        assertEquals(1L, result.get(1).getTeacherId());
+        assertEquals(LocalTime.of(10, 30), result.get(1).getStartTime());
+        assertEquals(LocalTime.of(11, 0), result.get(1).getEndTime());
+        assertFalse(result.get(1).isBooked());
+
+        assertEquals(1L, result.get(2).getTeacherId());
+        assertEquals(LocalTime.of(11, 0), result.get(2).getStartTime());
+        assertEquals(LocalTime.of(11, 30), result.get(2).getEndTime());
+        assertFalse(result.get(2).isBooked());
+
+        assertEquals(1L, result.get(3).getTeacherId());
+        assertEquals(LocalTime.of(11, 30), result.get(3).getStartTime());
+        assertEquals(LocalTime.of(12, 0), result.get(3).getEndTime());
+        assertFalse(result.get(3).isBooked());
+
+        verify(availabilityRepository, times(4)).save(any());
     }
 
     @Test
@@ -99,7 +111,7 @@ class AvailabilityServiceTest {
 
         when(availabilityRepository.findByTeacherId(1L)).thenReturn(List.of());
 
-        var result = availabilityService.getTeacherAvailability(1L);
+        List<AvailabilitySlot> result = availabilityService.getTeacherAvailability(1L);
 
         assertNotNull(result);
         verify(availabilityRepository, times(1)).findByTeacherId(1L);
