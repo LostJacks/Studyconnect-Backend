@@ -1,4 +1,9 @@
 package com.studyconnect.data.irepository;
 
-public class ISkillRepository {
+import com.studyconnect.domain.model.Skill;
+import java.util.List;
+
+public interface ISkillRepository {
+    List<Skill> findAll();
+    Skill findById(Long skillId);
 }
