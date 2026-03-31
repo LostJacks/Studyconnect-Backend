@@ -1,7 +1,8 @@
 package com.studyconnect.data.repository;
 
+import com.studyconnect.data.entity.UserEntity;
 import com.studyconnect.data.irepository.IUserRepository;
-import com.studyconnect.domain.model.Role;
+import com.studyconnect.data.mapper.UserMapper;
 import com.studyconnect.domain.model.User;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
@@ -18,6 +19,8 @@ public class UserRepository implements IUserRepository {
     @Override
     public User save(User user) {
 
+        UserEntity entity = UserMapper.toEntity(user);
+
         String sql = """
                 INSERT INTO users (name, email, password_hash, role)
                 VALUES (?, ?, ?, ?)
@@ -25,10 +28,10 @@ public class UserRepository implements IUserRepository {
 
         jdbcTemplate.update(
                 sql,
-                user.getName(),
-                user.getEmail(),
-                user.getPasswordHash(),
-                user.getRole().name()
+                entity.getName(),
+                entity.getEmail(),
+                entity.getPasswordHash(),
+                entity.getRole()
         );
 
         return user;
@@ -43,21 +46,23 @@ public class UserRepository implements IUserRepository {
                 WHERE email = ?
                 """;
 
-        return jdbcTemplate.query(
+        UserEntity entity = jdbcTemplate.query(
                 sql,
                 rs -> {
                     if (rs.next()) {
-                        return new User(
+                        return new UserEntity(
                                 rs.getLong("id"),
                                 rs.getString("name"),
                                 rs.getString("email"),
                                 rs.getString("password_hash"),
-                                Role.valueOf(rs.getString("role"))
+                                rs.getString("role")
                         );
                     }
                     return null;
                 },
                 email
         );
+
+        return UserMapper.toDomain(entity);
     }
 }
