@@ -6,6 +6,6 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public class TeacherSkill {
-    private Long teacherId;
-    private Long skillId;
+    private String teacherEmail;
+    private Skill skill;
 }
