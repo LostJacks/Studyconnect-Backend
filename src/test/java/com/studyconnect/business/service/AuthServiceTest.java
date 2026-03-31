@@ -36,7 +36,6 @@ class AuthServiceTest {
         request.setRole(Role.STUDENT);
 
         User savedUser = new User(
-                1L,
                 "Jack",
                 "jack@test.com",
                 passwordEncoder.encode("Abc123"),
@@ -49,7 +48,6 @@ class AuthServiceTest {
         AuthResponse result = authService.register(request);
 
         assertNotNull(result);
-        assertEquals(1L, result.getUserId());
         assertEquals("jack@test.com", result.getEmail());
         assertEquals(Role.STUDENT, result.getRole());
         assertEquals("Registration successful", result.getMessage());
@@ -118,7 +116,6 @@ class AuthServiceTest {
         request.setRole(Role.STUDENT);
 
         User existingUser = new User(
-                1L,
                 "Jack",
                 "jack@test.com",
                 passwordEncoder.encode("Abc123"),
@@ -144,7 +141,6 @@ class AuthServiceTest {
         request.setPassword("Abc123");
 
         User existingUser = new User(
-                1L,
                 "Jack",
                 "jack@test.com",
                 passwordEncoder.encode("Abc123"),
@@ -156,7 +152,6 @@ class AuthServiceTest {
         AuthResponse result = authService.login(request);
 
         assertNotNull(result);
-        assertEquals(1L, result.getUserId());
         assertEquals("jack@test.com", result.getEmail());
         assertEquals(Role.STUDENT, result.getRole());
         assertEquals("Login successful", result.getMessage());
@@ -214,7 +209,6 @@ class AuthServiceTest {
         request.setPassword("Wrong123");
 
         User existingUser = new User(
-                1L,
                 "Jack",
                 "jack@test.com",
                 passwordEncoder.encode("Abc123"),

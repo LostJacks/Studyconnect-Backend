@@ -32,7 +32,6 @@ public class AuthService {
             throw new IllegalArgumentException("All fields must be filled in");
         }
 
-
         String password = request.getPassword();
 
         if (!password.matches("^(?=.*[A-Z])(?=.*\\d).{6,}$")) {
@@ -49,7 +48,6 @@ public class AuthService {
         String hashedPassword = passwordEncoder.encode(password);
 
         User userToSave = new User(
-                null,
                 request.getName(),
                 request.getEmail(),
                 hashedPassword,
@@ -59,7 +57,6 @@ public class AuthService {
         User savedUser = userRepository.save(userToSave);
 
         return new AuthResponse(
-                savedUser.getId(),
                 savedUser.getEmail(),
                 savedUser.getRole(),
                 "Registration successful"
@@ -92,7 +89,6 @@ public class AuthService {
         }
 
         return new AuthResponse(
-                user.getId(),
                 user.getEmail(),
                 user.getRole(),
                 "Login successful"
