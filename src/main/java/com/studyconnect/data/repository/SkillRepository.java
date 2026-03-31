@@ -1,6 +1,8 @@
 package com.studyconnect.data.repository;
 
+import com.studyconnect.data.entity.SkillEntity;
 import com.studyconnect.data.irepository.ISkillRepository;
+import com.studyconnect.data.mapper.SkillMapper;
 import com.studyconnect.domain.model.Skill;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
@@ -23,13 +25,17 @@ public class SkillRepository implements ISkillRepository {
                 FROM skill
                 """;
 
-        return jdbcTemplate.query(
+        List<SkillEntity> entities = jdbcTemplate.query(
                 sql,
-                (rs, rowNum) -> new Skill(
+                (rs, rowNum) -> new SkillEntity(
                         rs.getLong("id"),
                         rs.getString("name")
                 )
         );
+
+        return entities.stream()
+                .map(SkillMapper::toDomain)
+                .toList();
     }
 
     @Override
@@ -40,11 +46,11 @@ public class SkillRepository implements ISkillRepository {
                 WHERE id = ?
                 """;
 
-        return jdbcTemplate.query(
+        SkillEntity entity = jdbcTemplate.query(
                 sql,
                 rs -> {
                     if (rs.next()) {
-                        return new Skill(
+                        return new SkillEntity(
                                 rs.getLong("id"),
                                 rs.getString("name")
                         );
@@ -53,5 +59,7 @@ public class SkillRepository implements ISkillRepository {
                 },
                 skillId
         );
+
+        return SkillMapper.toDomain(entity);
     }
 }

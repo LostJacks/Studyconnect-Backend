@@ -65,4 +65,33 @@ public class UserRepository implements IUserRepository {
 
         return UserMapper.toDomain(entity);
     }
+
+    @Override
+    public User findById(Long id) {
+
+        String sql = """
+                SELECT id, name, email, password_hash, role
+                FROM users
+                WHERE id = ?
+                """;
+
+        UserEntity entity = jdbcTemplate.query(
+                sql,
+                rs -> {
+                    if (rs.next()) {
+                        return new UserEntity(
+                                rs.getLong("id"),
+                                rs.getString("name"),
+                                rs.getString("email"),
+                                rs.getString("password_hash"),
+                                rs.getString("role")
+                        );
+                    }
+                    return null;
+                },
+                id
+        );
+
+        return UserMapper.toDomain(entity);
+    }
 }

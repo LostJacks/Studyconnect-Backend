@@ -50,17 +50,18 @@ public class AvailabilityService {
             LocalTime currentEnd = currentStart.plusMinutes(30);
 
             AvailabilitySlot slot = new AvailabilitySlot(
-                    null,
-                    request.getTeacherId(),
                     request.getDate(),
                     currentStart,
                     currentEnd,
                     false
             );
 
-            AvailabilitySlot savedSlot = availabilityRepository.save(slot);
-            createdSlots.add(savedSlot);
+            AvailabilitySlot savedSlot = availabilityRepository.saveForTeacher(
+                    slot,
+                    request.getTeacherId()
+            );
 
+            createdSlots.add(savedSlot);
             currentStart = currentEnd;
         }
 

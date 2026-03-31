@@ -2,8 +2,10 @@ package com.studyconnect.business.service;
 
 import com.studyconnect.data.irepository.ISkillRepository;
 import com.studyconnect.data.irepository.ITeacherSkillRepository;
+import com.studyconnect.data.irepository.IUserRepository;
+import com.studyconnect.domain.model.Role;
 import com.studyconnect.domain.model.Skill;
-import com.studyconnect.domain.model.TeacherSkill;
+import com.studyconnect.domain.model.User;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -13,21 +15,34 @@ public class SkillService {
 
     private final ISkillRepository skillRepository;
     private final ITeacherSkillRepository teacherSkillRepository;
+    private final IUserRepository userRepository;
 
     public SkillService(ISkillRepository skillRepository,
-                        ITeacherSkillRepository teacherSkillRepository) {
+                        ITeacherSkillRepository teacherSkillRepository,
+                        IUserRepository userRepository) {
         this.skillRepository = skillRepository;
         this.teacherSkillRepository = teacherSkillRepository;
+        this.userRepository = userRepository;
     }
 
     public List<Skill> getAllSkills() {
         return skillRepository.findAll();
     }
 
-    public TeacherSkill addSkillToTeacher(Long teacherId, Long skillId) {
+    public void addSkillToTeacher(Long teacherId, Long skillId) {
 
         if (teacherId == null || skillId == null) {
             throw new IllegalArgumentException("TeacherId and SkillId must be provided");
+        }
+
+        User user = userRepository.findById(teacherId);
+
+        if (user == null) {
+            throw new IllegalArgumentException("User does not exist");
+        }
+
+        if (user.getRole() != Role.TEACHER) {
+            throw new IllegalArgumentException("Only teachers can have skills");
         }
 
         Skill skill = skillRepository.findById(skillId);
@@ -36,9 +51,7 @@ public class SkillService {
             throw new IllegalArgumentException("Skill does not exist");
         }
 
-        TeacherSkill teacherSkill = new TeacherSkill(teacherId, skillId);
-
-        return teacherSkillRepository.save(teacherSkill);
+        teacherSkillRepository.saveByIds(teacherId, skillId);
     }
 
     public List<Skill> getSkillsByTeacher(Long teacherId) {

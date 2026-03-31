@@ -10,8 +10,6 @@ import java.time.LocalTime;
 @AllArgsConstructor
 public class AvailabilitySlot {
 
-    private Long id;
-    private Long teacherId;
     private LocalDate date;
     private LocalTime startTime;
     private LocalTime endTime;

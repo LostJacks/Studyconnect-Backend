@@ -2,7 +2,6 @@ package com.studyconnect.presentation.controller;
 
 import com.studyconnect.business.service.SkillService;
 import com.studyconnect.domain.model.Skill;
-import com.studyconnect.domain.model.TeacherSkill;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -23,10 +22,10 @@ public class SkillController {
     }
 
     @PostMapping("/teacher/{teacherId}/{skillId}")
-    public TeacherSkill addSkillToTeacher(
+    public void addSkillToTeacher(
             @PathVariable Long teacherId,
             @PathVariable Long skillId) {
-        return skillService.addSkillToTeacher(teacherId, skillId);
+        skillService.addSkillToTeacher(teacherId, skillId);
     }
 
     @GetMapping("/teacher/{teacherId}")

@@ -14,6 +14,7 @@ import java.time.LocalTime;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 class BookingServiceTest {
@@ -38,8 +39,6 @@ class BookingServiceTest {
         request.setDescription("Need help with algebra");
 
         AvailabilitySlot slot = new AvailabilitySlot(
-                1L,
-                10L,
                 LocalDate.of(2026, 3, 20),
                 LocalTime.of(10, 0),
                 LocalTime.of(10, 30),
@@ -47,9 +46,6 @@ class BookingServiceTest {
         );
 
         BookingRequest savedBooking = new BookingRequest(
-                1L,
-                1L,
-                2L,
                 slot.getStartTime(),
                 slot.getEndTime(),
                 request.getTitle(),
@@ -58,14 +54,17 @@ class BookingServiceTest {
         );
 
         when(availabilityRepository.findById(1L)).thenReturn(slot);
-        when(bookingRepository.save(any(BookingRequest.class))).thenReturn(savedBooking);
+        when(bookingRepository.saveForSlotAndRequester(any(BookingRequest.class), eq(1L), eq(2L)))
+                .thenReturn(savedBooking);
 
         BookingRequest result = bookingService.createBooking(request);
 
         assertNotNull(result);
         assertEquals(BookingStatus.PENDING, result.getStatus());
+
         verify(availabilityRepository, times(1)).findById(1L);
-        verify(bookingRepository, times(1)).save(any(BookingRequest.class));
+        verify(bookingRepository, times(1))
+                .saveForSlotAndRequester(any(BookingRequest.class), eq(1L), eq(2L));
     }
 
     @Test
@@ -77,6 +76,7 @@ class BookingServiceTest {
 
         assertEquals("Request cannot be null", exception.getMessage());
         verifyNoInteractions(availabilityRepository);
+        verifyNoInteractions(bookingRepository);
     }
 
     @Test
@@ -94,6 +94,7 @@ class BookingServiceTest {
 
         assertEquals("All fields must be filled in", exception.getMessage());
         verifyNoInteractions(availabilityRepository);
+        verifyNoInteractions(bookingRepository);
     }
 
     @Test
@@ -112,7 +113,8 @@ class BookingServiceTest {
         );
 
         assertEquals("Availability slot does not exist", exception.getMessage());
-        verify(availabilityRepository).findById(99L);
+        verify(availabilityRepository, times(1)).findById(99L);
+        verifyNoInteractions(bookingRepository);
     }
 
     @Test
@@ -124,8 +126,6 @@ class BookingServiceTest {
         request.setDescription("Test");
 
         AvailabilitySlot slot = new AvailabilitySlot(
-                1L,
-                10L,
                 LocalDate.now(),
                 LocalTime.of(10, 0),
                 LocalTime.of(10, 30),
@@ -140,6 +140,7 @@ class BookingServiceTest {
         );
 
         assertEquals("This slot is already booked", exception.getMessage());
-        verify(availabilityRepository).findById(1L);
+        verify(availabilityRepository, times(1)).findById(1L);
+        verifyNoInteractions(bookingRepository);
     }
 }

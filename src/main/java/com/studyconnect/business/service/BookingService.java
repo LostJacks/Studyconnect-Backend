@@ -44,9 +44,6 @@ public class BookingService {
         }
 
         BookingRequest bookingRequest = new BookingRequest(
-                null,
-                request.getSlotId(),
-                request.getRequesterId(),
                 slot.getStartTime(),
                 slot.getEndTime(),
                 request.getTitle(),
@@ -54,7 +51,11 @@ public class BookingService {
                 BookingStatus.PENDING
         );
 
-        return bookingRepository.save(bookingRequest);
+        return bookingRepository.saveForSlotAndRequester(
+                bookingRequest,
+                request.getSlotId(),
+                request.getRequesterId()
+        );
     }
 
     public BookingRequest acceptBooking(Long bookingId, Long teacherId) {
@@ -77,13 +78,25 @@ public class BookingService {
             throw new IllegalArgumentException("Only pending booking requests can be accepted");
         }
 
-        AvailabilitySlot slot = availabilityRepository.findById(bookingRequest.getSlotId());
+        Long slotId = bookingRepository.findSlotIdByBookingId(bookingId);
+
+        if (slotId == null) {
+            throw new IllegalArgumentException("Availability slot does not exist");
+        }
+
+        AvailabilitySlot slot = availabilityRepository.findById(slotId);
 
         if (slot == null) {
             throw new IllegalArgumentException("Availability slot does not exist");
         }
 
-        if (!slot.getTeacherId().equals(teacherId)) {
+        Long slotTeacherId = availabilityRepository.findTeacherIdBySlotId(slotId);
+
+        if (slotTeacherId == null) {
+            throw new IllegalArgumentException("Availability slot does not exist");
+        }
+
+        if (!slotTeacherId.equals(teacherId)) {
             throw new IllegalArgumentException("Only the targeted teacher can respond to this booking request");
         }
 
@@ -92,12 +105,9 @@ public class BookingService {
         }
 
         bookingRepository.updateStatus(bookingId, BookingStatus.ACCEPTED);
-        availabilityRepository.updateBookedStatus(slot.getId(), true);
+        availabilityRepository.updateBookedStatus(slotId, true);
 
         return new BookingRequest(
-                bookingRequest.getId(),
-                bookingRequest.getSlotId(),
-                bookingRequest.getRequesterId(),
                 bookingRequest.getStartTime(),
                 bookingRequest.getEndTime(),
                 bookingRequest.getTitle(),
@@ -126,22 +136,31 @@ public class BookingService {
             throw new IllegalArgumentException("Only pending booking requests can be rejected");
         }
 
-        AvailabilitySlot slot = availabilityRepository.findById(bookingRequest.getSlotId());
+        Long slotId = bookingRepository.findSlotIdByBookingId(bookingId);
+
+        if (slotId == null) {
+            throw new IllegalArgumentException("Availability slot does not exist");
+        }
+
+        AvailabilitySlot slot = availabilityRepository.findById(slotId);
 
         if (slot == null) {
             throw new IllegalArgumentException("Availability slot does not exist");
         }
 
-        if (!slot.getTeacherId().equals(teacherId)) {
+        Long slotTeacherId = availabilityRepository.findTeacherIdBySlotId(slotId);
+
+        if (slotTeacherId == null) {
+            throw new IllegalArgumentException("Availability slot does not exist");
+        }
+
+        if (!slotTeacherId.equals(teacherId)) {
             throw new IllegalArgumentException("Only the targeted teacher can respond to this booking request");
         }
 
         bookingRepository.updateStatus(bookingId, BookingStatus.REJECTED);
 
         return new BookingRequest(
-                bookingRequest.getId(),
-                bookingRequest.getSlotId(),
-                bookingRequest.getRequesterId(),
                 bookingRequest.getStartTime(),
                 bookingRequest.getEndTime(),
                 bookingRequest.getTitle(),
@@ -150,5 +169,3 @@ public class BookingService {
         );
     }
 }
-
-//testing//

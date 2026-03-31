@@ -5,9 +5,11 @@ import com.studyconnect.domain.model.BookingStatus;
 
 public interface IBookingRepository {
 
-    BookingRequest save(BookingRequest bookingRequest);
+    BookingRequest saveForSlotAndRequester(BookingRequest bookingRequest, Long slotId, Long requesterId);
 
     BookingRequest findById(Long bookingId);
+
+    Long findSlotIdByBookingId(Long bookingId);
 
     void updateStatus(Long bookingId, BookingStatus status);
 }

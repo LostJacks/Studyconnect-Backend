@@ -1,15 +1,14 @@
 package com.studyconnect.data.repository;
 
+import com.studyconnect.data.entity.BookingRequestEntity;
 import com.studyconnect.data.irepository.IBookingRepository;
+import com.studyconnect.data.mapper.BookingRequestMapper;
 import com.studyconnect.domain.model.BookingRequest;
 import com.studyconnect.domain.model.BookingStatus;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.support.GeneratedKeyHolder;
-import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 
-import java.sql.PreparedStatement;
-import java.sql.Statement;
+import java.util.List;
 
 @Repository
 public class BookingRepository implements IBookingRepository {
@@ -21,39 +20,27 @@ public class BookingRepository implements IBookingRepository {
     }
 
     @Override
-    public BookingRequest save(BookingRequest bookingRequest) {
+    public BookingRequest saveForSlotAndRequester(BookingRequest bookingRequest, Long slotId, Long requesterId) {
+        BookingRequestEntity entity = BookingRequestMapper.toEntity(bookingRequest, slotId, requesterId);
+
         String sql = """
                 INSERT INTO booking_request
                 (slot_id, requester_id, start_time, end_time, title, description, status)
                 VALUES (?, ?, ?, ?, ?, ?, ?)
                 """;
 
-        KeyHolder keyHolder = new GeneratedKeyHolder();
-
-        jdbcTemplate.update(connection -> {
-            PreparedStatement ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
-            ps.setLong(1, bookingRequest.getSlotId());
-            ps.setLong(2, bookingRequest.getRequesterId());
-            ps.setObject(3, bookingRequest.getStartTime());
-            ps.setObject(4, bookingRequest.getEndTime());
-            ps.setString(5, bookingRequest.getTitle());
-            ps.setString(6, bookingRequest.getDescription());
-            ps.setString(7, bookingRequest.getStatus().name());
-            return ps;
-        }, keyHolder);
-
-        Long generatedId = keyHolder.getKey() != null ? keyHolder.getKey().longValue() : null;
-
-        return new BookingRequest(
-                generatedId,
-                bookingRequest.getSlotId(),
-                bookingRequest.getRequesterId(),
-                bookingRequest.getStartTime(),
-                bookingRequest.getEndTime(),
-                bookingRequest.getTitle(),
-                bookingRequest.getDescription(),
-                bookingRequest.getStatus()
+        jdbcTemplate.update(
+                sql,
+                entity.getSlotId(),
+                entity.getRequesterId(),
+                entity.getStartTime(),
+                entity.getEndTime(),
+                entity.getTitle(),
+                entity.getDescription(),
+                entity.getStatus()
         );
+
+        return bookingRequest;
     }
 
     @Override
@@ -64,11 +51,11 @@ public class BookingRepository implements IBookingRepository {
                 WHERE id = ?
                 """;
 
-        return jdbcTemplate.query(
+        BookingRequestEntity entity = jdbcTemplate.query(
                 sql,
                 rs -> {
                     if (rs.next()) {
-                        return new BookingRequest(
+                        return new BookingRequestEntity(
                                 rs.getLong("id"),
                                 rs.getLong("slot_id"),
                                 rs.getLong("requester_id"),
@@ -76,13 +63,32 @@ public class BookingRepository implements IBookingRepository {
                                 rs.getTime("end_time").toLocalTime(),
                                 rs.getString("title"),
                                 rs.getString("description"),
-                                BookingStatus.valueOf(rs.getString("status"))
+                                rs.getString("status")
                         );
                     }
                     return null;
                 },
                 bookingId
         );
+
+        return BookingRequestMapper.toDomain(entity);
+    }
+
+    @Override
+    public Long findSlotIdByBookingId(Long bookingId) {
+        String sql = """
+                SELECT slot_id
+                FROM booking_request
+                WHERE id = ?
+                """;
+
+        List<Long> results = jdbcTemplate.query(
+                sql,
+                (rs, rowNum) -> rs.getLong("slot_id"),
+                bookingId
+        );
+
+        return results.isEmpty() ? null : results.get(0);
     }
 
     @Override

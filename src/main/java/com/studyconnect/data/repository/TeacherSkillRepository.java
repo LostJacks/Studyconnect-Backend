@@ -1,8 +1,10 @@
 package com.studyconnect.data.repository;
 
+import com.studyconnect.data.entity.SkillEntity;
+import com.studyconnect.data.entity.TeacherSkillEntity;
 import com.studyconnect.data.irepository.ITeacherSkillRepository;
+import com.studyconnect.data.mapper.SkillMapper;
 import com.studyconnect.domain.model.Skill;
-import com.studyconnect.domain.model.TeacherSkill;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
@@ -18,19 +20,19 @@ public class TeacherSkillRepository implements ITeacherSkillRepository {
     }
 
     @Override
-    public TeacherSkill save(TeacherSkill teacherSkill) {
+    public void saveByIds(Long teacherId, Long skillId) {
         String sql = """
                 INSERT INTO teacher_skill (teacher_id, skill_id)
                 VALUES (?, ?)
                 """;
 
+        TeacherSkillEntity entity = new TeacherSkillEntity(teacherId, skillId);
+
         jdbcTemplate.update(
                 sql,
-                teacherSkill.getTeacherId(),
-                teacherSkill.getSkillId()
+                entity.getTeacherId(),
+                entity.getSkillId()
         );
-
-        return teacherSkill;
     }
 
     @Override
@@ -42,13 +44,17 @@ public class TeacherSkillRepository implements ITeacherSkillRepository {
                 WHERE ts.teacher_id = ?
                 """;
 
-        return jdbcTemplate.query(
+        List<SkillEntity> entities = jdbcTemplate.query(
                 sql,
-                (rs, rowNum) -> new Skill(
+                (rs, rowNum) -> new SkillEntity(
                         rs.getLong("id"),
                         rs.getString("name")
                 ),
                 teacherId
         );
+
+        return entities.stream()
+                .map(SkillMapper::toDomain)
+                .toList();
     }
 }

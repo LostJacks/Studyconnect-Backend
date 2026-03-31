@@ -6,12 +6,15 @@ import java.util.List;
 
 public interface IAvailabilityRepository {
 
-    AvailabilitySlot save(AvailabilitySlot slot);
+    AvailabilitySlot saveForTeacher(AvailabilitySlot slot, Long teacherId);
 
-    List<AvailabilitySlot> findByTeacherId(Long helperId);
+    List<AvailabilitySlot> findByTeacherId(Long teacherId);
 
     AvailabilitySlot findById(Long id);
 
+    Long findTeacherIdBySlotId(Long slotId);
+
     void markAsBooked(Long id);
+
     void updateBookedStatus(Long slotId, boolean booked);
 }

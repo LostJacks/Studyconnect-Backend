@@ -1,6 +1,8 @@
 package com.studyconnect.data.repository;
 
+import com.studyconnect.data.entity.AvailabilitySlotEntity;
 import com.studyconnect.data.irepository.IAvailabilityRepository;
+import com.studyconnect.data.mapper.AvailabilitySlotMapper;
 import com.studyconnect.domain.model.AvailabilitySlot;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
@@ -17,34 +19,21 @@ public class AvailabilityRepository implements IAvailabilityRepository {
     }
 
     @Override
-    public void markAsBooked(Long id) {
-        String sql = "UPDATE availability_slot SET booked = true WHERE id = ?";
-        jdbcTemplate.update(sql, id);
-    }
-
-    @Override
-    public void updateBookedStatus(Long slotId, boolean booked) {
+    public AvailabilitySlot saveForTeacher(AvailabilitySlot slot, Long teacherId) {
+        AvailabilitySlotEntity entity = AvailabilitySlotMapper.toEntity(slot, teacherId);
 
         String sql = """
-            UPDATE availability_slot
-            SET booked = ?
-            WHERE id = ?
-            """;
-
-        jdbcTemplate.update(sql, booked, slotId);
-    }
-
-    @Override
-    public AvailabilitySlot save(AvailabilitySlot slot) {
-        String sql = "INSERT INTO availability_slot (teacher_id, date, start_time, end_time, booked) VALUES (?, ?, ?, ?, ?)";
+                INSERT INTO availability_slot (teacher_id, date, start_time, end_time, booked)
+                VALUES (?, ?, ?, ?, ?)
+                """;
 
         jdbcTemplate.update(
                 sql,
-                slot.getTeacherId(),
-                slot.getDate(),
-                slot.getStartTime(),
-                slot.getEndTime(),
-                false
+                entity.getTeacherId(),
+                entity.getDate(),
+                entity.getStartTime(),
+                entity.getEndTime(),
+                entity.isBooked()
         );
 
         return slot;
@@ -59,17 +48,22 @@ public class AvailabilityRepository implements IAvailabilityRepository {
                 AND booked = FALSE
                 """;
 
-        return jdbcTemplate.query(sql, (rs, rowNum) ->
-                        new AvailabilitySlot(
-                                rs.getLong("id"),
-                                rs.getLong("teacher_id"),
-                                rs.getDate("date").toLocalDate(),
-                                rs.getTime("start_time").toLocalTime(),
-                                rs.getTime("end_time").toLocalTime(),
-                                rs.getBoolean("booked")
-                        ),
+        List<AvailabilitySlotEntity> entities = jdbcTemplate.query(
+                sql,
+                (rs, rowNum) -> new AvailabilitySlotEntity(
+                        rs.getLong("id"),
+                        rs.getLong("teacher_id"),
+                        rs.getDate("date").toLocalDate(),
+                        rs.getTime("start_time").toLocalTime(),
+                        rs.getTime("end_time").toLocalTime(),
+                        rs.getBoolean("booked")
+                ),
                 teacherId
         );
+
+        return entities.stream()
+                .map(AvailabilitySlotMapper::toDomain)
+                .toList();
     }
 
     @Override
@@ -80,18 +74,58 @@ public class AvailabilityRepository implements IAvailabilityRepository {
                 WHERE id = ?
                 """;
 
-        List<AvailabilitySlot> results = jdbcTemplate.query(sql, (rs, rowNum) ->
-                        new AvailabilitySlot(
+        AvailabilitySlotEntity entity = jdbcTemplate.query(
+                sql,
+                rs -> {
+                    if (rs.next()) {
+                        return new AvailabilitySlotEntity(
                                 rs.getLong("id"),
                                 rs.getLong("teacher_id"),
                                 rs.getDate("date").toLocalDate(),
                                 rs.getTime("start_time").toLocalTime(),
                                 rs.getTime("end_time").toLocalTime(),
                                 rs.getBoolean("booked")
-                        ),
+                        );
+                    }
+                    return null;
+                },
                 id
         );
 
+        return AvailabilitySlotMapper.toDomain(entity);
+    }
+
+    @Override
+    public Long findTeacherIdBySlotId(Long slotId) {
+        String sql = """
+                SELECT teacher_id
+                FROM availability_slot
+                WHERE id = ?
+                """;
+
+        List<Long> results = jdbcTemplate.query(
+                sql,
+                (rs, rowNum) -> rs.getLong("teacher_id"),
+                slotId
+        );
+
         return results.isEmpty() ? null : results.get(0);
+    }
+
+    @Override
+    public void markAsBooked(Long id) {
+        String sql = "UPDATE availability_slot SET booked = true WHERE id = ?";
+        jdbcTemplate.update(sql, id);
+    }
+
+    @Override
+    public void updateBookedStatus(Long slotId, boolean booked) {
+        String sql = """
+                UPDATE availability_slot
+                SET booked = ?
+                WHERE id = ?
+                """;
+
+        jdbcTemplate.update(sql, booked, slotId);
     }
 }

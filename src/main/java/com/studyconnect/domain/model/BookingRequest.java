@@ -9,13 +9,9 @@ import java.time.LocalTime;
 @AllArgsConstructor
 public class BookingRequest {
 
-    private Long id;
-    private Long slotId;
-    private Long requesterId;
     private LocalTime startTime;
     private LocalTime endTime;
     private String title;
     private String description;
     private BookingStatus status;
-
 }
