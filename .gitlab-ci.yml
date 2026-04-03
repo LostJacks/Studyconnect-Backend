@@ -1,6 +1,7 @@
-.stages:
+stages:
   - build
   - test
+  - package
 
 cache:
   key: gradle-cache
@@ -13,10 +14,7 @@ build_backend:
   tags:
     - local
   script:
-    - .\gradlew.bat build -x test --build-cache --no-daemon
-  artifacts:
-    paths:
-      - build/libs/
+    - .\gradlew.bat assemble --build-cache --no-daemon
 
 test_backend:
   stage: test
@@ -29,3 +27,14 @@ test_backend:
     paths:
       - build/reports/tests/test/
       - build/test-results/test/
+
+package_backend:
+  stage: package
+  tags:
+    - local
+  script:
+    - .\gradlew.bat bootJar --build-cache --no-daemon
+  artifacts:
+    paths:
+      - build/libs/*.jar
+    expire_in: 1 week
