@@ -2,9 +2,12 @@ package com.studyconnect.business.service;
 
 import com.studyconnect.data.irepository.IAvailabilityRepository;
 import com.studyconnect.data.irepository.IBookingRepository;
+import com.studyconnect.data.irepository.IUserRepository;
 import com.studyconnect.domain.model.AvailabilitySlot;
 import com.studyconnect.domain.model.BookingRequest;
 import com.studyconnect.domain.model.BookingStatus;
+import com.studyconnect.domain.model.User;
+import com.studyconnect.domain.model.Role;
 import com.studyconnect.presentation.dto.CreateBookingRequest;
 import org.springframework.stereotype.Service;
 
@@ -13,11 +16,14 @@ public class BookingService {
 
     private final IBookingRepository bookingRepository;
     private final IAvailabilityRepository availabilityRepository;
+    private final IUserRepository userRepository;
 
     public BookingService(IBookingRepository bookingRepository,
-                          IAvailabilityRepository availabilityRepository) {
+                          IAvailabilityRepository availabilityRepository,
+                          IUserRepository userRepository) {
         this.bookingRepository = bookingRepository;
         this.availabilityRepository = availabilityRepository;
+        this.userRepository = userRepository;
     }
 
     public BookingRequest createBooking(CreateBookingRequest request) {
@@ -31,6 +37,16 @@ public class BookingService {
                 request.getTitle() == null || request.getTitle().isBlank() ||
                 request.getDescription() == null || request.getDescription().isBlank()) {
             throw new IllegalArgumentException("All fields must be filled in");
+        }
+
+        User requester = userRepository.findById(request.getRequesterId());
+
+        if (requester == null) {
+            throw new IllegalArgumentException("Requester does not exist");
+        }
+
+        if (requester.getRole() != Role.STUDENT) {
+            throw new IllegalArgumentException("Only students can create booking requests");
         }
 
         AvailabilitySlot slot = availabilityRepository.findById(request.getSlotId());
