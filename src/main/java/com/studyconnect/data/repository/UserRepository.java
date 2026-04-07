@@ -7,6 +7,8 @@ import com.studyconnect.domain.model.User;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 @Repository
 public class UserRepository implements IUserRepository {
 
@@ -14,6 +16,17 @@ public class UserRepository implements IUserRepository {
 
     public UserRepository(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
+    }
+
+    @Override
+    public void updateBio(Long userId, String bio) {
+        String sql = """
+                UPDATE users
+                SET bio = ?
+                WHERE id = ?
+                """;
+
+        jdbcTemplate.update(sql, bio, userId);
     }
 
     @Override
@@ -67,6 +80,34 @@ public class UserRepository implements IUserRepository {
     }
 
     @Override
+    public UserEntity findEntityByEmail(String email) {
+        String sql = """
+                SELECT id, name, email, password_hash, role, bio
+                FROM users
+                WHERE email = ?
+                """;
+
+        return jdbcTemplate.query(
+                sql,
+                rs -> {
+                    if (rs.next()) {
+                        return new UserEntity(
+                                rs.getLong("id"),
+                                rs.getString("name"),
+                                rs.getString("email"),
+                                rs.getString("password_hash"),
+                                rs.getString("role"),
+                                rs.getString("bio"),
+                                null
+                        );
+                    }
+                    return null;
+                },
+                email
+        );
+    }
+
+    @Override
     public User findById(Long id) {
 
         String sql = """
@@ -93,5 +134,27 @@ public class UserRepository implements IUserRepository {
         );
 
         return UserMapper.toDomain(entity);
+    }
+
+    @Override
+    public List<UserEntity> findAll() {
+
+        String sql = """
+                SELECT id, name, email, password_hash, role, bio
+                FROM users
+                """;
+
+        return jdbcTemplate.query(
+                sql,
+                (rs, rowNum) -> new UserEntity(
+                        rs.getLong("id"),
+                        rs.getString("name"),
+                        rs.getString("email"),
+                        rs.getString("password_hash"),
+                        rs.getString("role"),
+                        rs.getString("bio"),
+                        null
+                )
+        );
     }
 }

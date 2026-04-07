@@ -2,6 +2,7 @@ package com.studyconnect.presentation.controller;
 
 import com.studyconnect.business.service.SkillService;
 import com.studyconnect.domain.model.Skill;
+import com.studyconnect.presentation.dto.SkillResponse;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -17,8 +18,8 @@ public class SkillController {
     }
 
     @GetMapping
-    public List<Skill> getAllSkills() {
-        return skillService.getAllSkills();
+    public List<SkillResponse> getAllSkills() {
+        return skillService.getAllSkillResponses();
     }
 
     @PostMapping("/teacher/{teacherId}/{skillId}")

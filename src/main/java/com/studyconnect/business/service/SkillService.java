@@ -6,6 +6,7 @@ import com.studyconnect.data.irepository.IUserRepository;
 import com.studyconnect.domain.model.Role;
 import com.studyconnect.domain.model.Skill;
 import com.studyconnect.domain.model.User;
+import com.studyconnect.presentation.dto.SkillResponse;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -27,6 +28,10 @@ public class SkillService {
 
     public List<Skill> getAllSkills() {
         return skillRepository.findAll();
+    }
+
+    public List<SkillResponse> getAllSkillResponses() {
+        return skillRepository.findAllSkillResponses();
     }
 
     public void addSkillToTeacher(Long teacherId, Long skillId) {

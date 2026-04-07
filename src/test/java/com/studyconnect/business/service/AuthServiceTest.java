@@ -1,5 +1,6 @@
 package com.studyconnect.business.service;
 
+import com.studyconnect.data.entity.UserEntity;
 import com.studyconnect.data.irepository.IUserRepository;
 import com.studyconnect.domain.model.Role;
 import com.studyconnect.domain.model.User;
@@ -17,13 +18,15 @@ import static org.mockito.Mockito.*;
 class AuthServiceTest {
 
     private IUserRepository userRepository;
+    private JwtService jwtService;
     private AuthService authService;
     private BCryptPasswordEncoder passwordEncoder;
 
     @BeforeEach
     void setUp() {
         userRepository = mock(IUserRepository.class);
-        authService = new AuthService(userRepository);
+        jwtService = mock(JwtService.class);
+        authService = new AuthService(userRepository, jwtService);
         passwordEncoder = new BCryptPasswordEncoder();
     }
 
@@ -42,18 +45,31 @@ class AuthServiceTest {
                 Role.STUDENT
         );
 
+        UserEntity savedUserEntity = new UserEntity(
+                1L,
+                "Jack",
+                "jack@test.com",
+                passwordEncoder.encode("Abc123"),
+                "STUDENT"
+        );
+
         when(userRepository.findByEmail("jack@test.com")).thenReturn(null);
         when(userRepository.save(any(User.class))).thenReturn(savedUser);
+        when(userRepository.findEntityByEmail("jack@test.com")).thenReturn(savedUserEntity);
 
         AuthResponse result = authService.register(request);
 
         assertNotNull(result);
+        assertEquals(1L, result.getId());
+        assertNull(result.getToken());
+        assertEquals("Jack", result.getName());
         assertEquals("jack@test.com", result.getEmail());
         assertEquals(Role.STUDENT, result.getRole());
-        assertEquals("Registration successful", result.getMessage());
 
         verify(userRepository, times(1)).findByEmail("jack@test.com");
         verify(userRepository, times(1)).save(any(User.class));
+        verify(userRepository, times(1)).findEntityByEmail("jack@test.com");
+        verify(jwtService, never()).generateToken(anyString(), anyString());
     }
 
     @Test
@@ -66,6 +82,8 @@ class AuthServiceTest {
         assertEquals("Request cannot be null", exception.getMessage());
         verify(userRepository, never()).findByEmail(any());
         verify(userRepository, never()).save(any());
+        verify(userRepository, never()).findEntityByEmail(any());
+        verify(jwtService, never()).generateToken(anyString(), anyString());
     }
 
     @Test
@@ -84,6 +102,8 @@ class AuthServiceTest {
         assertEquals("All fields must be filled in", exception.getMessage());
         verify(userRepository, never()).findByEmail(any());
         verify(userRepository, never()).save(any());
+        verify(userRepository, never()).findEntityByEmail(any());
+        verify(jwtService, never()).generateToken(anyString(), anyString());
     }
 
     @Test
@@ -105,6 +125,8 @@ class AuthServiceTest {
         );
         verify(userRepository, never()).findByEmail(any());
         verify(userRepository, never()).save(any());
+        verify(userRepository, never()).findEntityByEmail(any());
+        verify(jwtService, never()).generateToken(anyString(), anyString());
     }
 
     @Test
@@ -132,6 +154,8 @@ class AuthServiceTest {
         assertEquals("Email is already registered", exception.getMessage());
         verify(userRepository, times(1)).findByEmail("jack@test.com");
         verify(userRepository, never()).save(any());
+        verify(userRepository, never()).findEntityByEmail(any());
+        verify(jwtService, never()).generateToken(anyString(), anyString());
     }
 
     @Test
@@ -140,23 +164,28 @@ class AuthServiceTest {
         request.setEmail("jack@test.com");
         request.setPassword("Abc123");
 
-        User existingUser = new User(
+        UserEntity existingUserEntity = new UserEntity(
+                1L,
                 "Jack",
                 "jack@test.com",
                 passwordEncoder.encode("Abc123"),
-                Role.STUDENT
+                "STUDENT"
         );
 
-        when(userRepository.findByEmail("jack@test.com")).thenReturn(existingUser);
+        when(userRepository.findEntityByEmail("jack@test.com")).thenReturn(existingUserEntity);
+        when(jwtService.generateToken("jack@test.com", "STUDENT")).thenReturn("fake-jwt-token");
 
         AuthResponse result = authService.login(request);
 
         assertNotNull(result);
+        assertEquals(1L, result.getId());
+        assertEquals("fake-jwt-token", result.getToken());
+        assertEquals("Jack", result.getName());
         assertEquals("jack@test.com", result.getEmail());
         assertEquals(Role.STUDENT, result.getRole());
-        assertEquals("Login successful", result.getMessage());
 
-        verify(userRepository, times(1)).findByEmail("jack@test.com");
+        verify(userRepository, times(1)).findEntityByEmail("jack@test.com");
+        verify(jwtService, times(1)).generateToken("jack@test.com", "STUDENT");
     }
 
     @Test
@@ -167,7 +196,8 @@ class AuthServiceTest {
         );
 
         assertEquals("Request cannot be null", exception.getMessage());
-        verify(userRepository, never()).findByEmail(any());
+        verify(userRepository, never()).findEntityByEmail(any());
+        verify(jwtService, never()).generateToken(anyString(), anyString());
     }
 
     @Test
@@ -182,7 +212,8 @@ class AuthServiceTest {
         );
 
         assertEquals("All fields must be filled in", exception.getMessage());
-        verify(userRepository, never()).findByEmail(any());
+        verify(userRepository, never()).findEntityByEmail(any());
+        verify(jwtService, never()).generateToken(anyString(), anyString());
     }
 
     @Test
@@ -191,7 +222,7 @@ class AuthServiceTest {
         request.setEmail("jack@test.com");
         request.setPassword("Abc123");
 
-        when(userRepository.findByEmail("jack@test.com")).thenReturn(null);
+        when(userRepository.findEntityByEmail("jack@test.com")).thenReturn(null);
 
         IllegalArgumentException exception = assertThrows(
                 IllegalArgumentException.class,
@@ -199,7 +230,8 @@ class AuthServiceTest {
         );
 
         assertEquals("Invalid email or password", exception.getMessage());
-        verify(userRepository, times(1)).findByEmail("jack@test.com");
+        verify(userRepository, times(1)).findEntityByEmail("jack@test.com");
+        verify(jwtService, never()).generateToken(anyString(), anyString());
     }
 
     @Test
@@ -208,14 +240,15 @@ class AuthServiceTest {
         request.setEmail("jack@test.com");
         request.setPassword("Wrong123");
 
-        User existingUser = new User(
+        UserEntity existingUserEntity = new UserEntity(
+                1L,
                 "Jack",
                 "jack@test.com",
                 passwordEncoder.encode("Abc123"),
-                Role.STUDENT
+                "STUDENT"
         );
 
-        when(userRepository.findByEmail("jack@test.com")).thenReturn(existingUser);
+        when(userRepository.findEntityByEmail("jack@test.com")).thenReturn(existingUserEntity);
 
         IllegalArgumentException exception = assertThrows(
                 IllegalArgumentException.class,
@@ -223,6 +256,7 @@ class AuthServiceTest {
         );
 
         assertEquals("Invalid email or password", exception.getMessage());
-        verify(userRepository, times(1)).findByEmail("jack@test.com");
+        verify(userRepository, times(1)).findEntityByEmail("jack@test.com");
+        verify(jwtService, never()).generateToken(anyString(), anyString());
     }
 }

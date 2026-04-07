@@ -1,6 +1,8 @@
 package com.studyconnect.business.service;
 
+import com.studyconnect.data.entity.UserEntity;
 import com.studyconnect.data.irepository.IUserRepository;
+import com.studyconnect.domain.model.Role;
 import com.studyconnect.domain.model.User;
 import com.studyconnect.presentation.dto.AuthResponse;
 import com.studyconnect.presentation.dto.LoginRequest;
@@ -13,9 +15,11 @@ public class AuthService {
 
     private final IUserRepository userRepository;
     private final BCryptPasswordEncoder passwordEncoder;
+    private final JwtService jwtService;
 
-    public AuthService(IUserRepository userRepository) {
+    public AuthService(IUserRepository userRepository, JwtService jwtService) {
         this.userRepository = userRepository;
+        this.jwtService = jwtService;
         this.passwordEncoder = new BCryptPasswordEncoder();
     }
 
@@ -54,12 +58,16 @@ public class AuthService {
                 request.getRole()
         );
 
-        User savedUser = userRepository.save(userToSave);
+        userRepository.save(userToSave);
+
+        UserEntity savedUserEntity = userRepository.findEntityByEmail(request.getEmail());
 
         return new AuthResponse(
-                savedUser.getEmail(),
-                savedUser.getRole(),
-                "Registration successful"
+                savedUserEntity.getId(),
+                null,
+                savedUserEntity.getName(),
+                savedUserEntity.getEmail(),
+                Role.valueOf(savedUserEntity.getRole())
         );
     }
 
@@ -74,24 +82,31 @@ public class AuthService {
             throw new IllegalArgumentException("All fields must be filled in");
         }
 
-        User user = userRepository.findByEmail(request.getEmail());
-        if (user == null) {
+        UserEntity userEntity = userRepository.findEntityByEmail(request.getEmail());
+        if (userEntity == null) {
             throw new IllegalArgumentException("Invalid email or password");
         }
 
         boolean passwordMatches = passwordEncoder.matches(
                 request.getPassword(),
-                user.getPasswordHash()
+                userEntity.getPasswordHash()
         );
 
         if (!passwordMatches) {
             throw new IllegalArgumentException("Invalid email or password");
         }
 
+        String token = jwtService.generateToken(
+                userEntity.getEmail(),
+                userEntity.getRole()
+        );
+
         return new AuthResponse(
-                user.getEmail(),
-                user.getRole(),
-                "Login successful"
+                userEntity.getId(),
+                token,
+                userEntity.getName(),
+                userEntity.getEmail(),
+                Role.valueOf(userEntity.getRole())
         );
     }
 }
