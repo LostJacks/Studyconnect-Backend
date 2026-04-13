@@ -8,7 +8,6 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/skills")
 public class SkillController {
 
     private final SkillService skillService;
@@ -17,19 +16,19 @@ public class SkillController {
         this.skillService = skillService;
     }
 
-    @GetMapping
+    @GetMapping("/skills")
     public List<SkillResponse> getAllSkills() {
         return skillService.getAllSkillResponses();
     }
 
-    @PostMapping("/teacher/{teacherId}/{skillId}")
+    @PostMapping("/teachers/{teacherId}/skills/{skillId}")
     public void addSkillToTeacher(
             @PathVariable Long teacherId,
             @PathVariable Long skillId) {
         skillService.addSkillToTeacher(teacherId, skillId);
     }
 
-    @GetMapping("/teacher/{teacherId}")
+    @GetMapping("/teachers/{teacherId}/skills")
     public List<Skill> getSkillsByTeacher(@PathVariable Long teacherId) {
         return skillService.getSkillsByTeacher(teacherId);
     }

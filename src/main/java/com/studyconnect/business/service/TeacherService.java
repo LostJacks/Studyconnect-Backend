@@ -30,21 +30,25 @@ public class TeacherService {
                 .collect(Collectors.toList());
     }
 
-    public void completeTeacherProfile(CompleteTeacherProfileRequest request) {
-        validateTeacherProfile(request);
+    public void completeTeacherProfile(Long teacherId, CompleteTeacherProfileRequest request) {
+        validateTeacherProfile(teacherId, request);
 
-        userRepository.updateBio(request.getTeacherId(), request.getBio());
+        userRepository.updateBio(teacherId, request.getBio());
 
-        skillRepository.deleteTeacherSkillsByTeacherId(request.getTeacherId());
+        skillRepository.deleteTeacherSkillsByTeacherId(teacherId);
 
         for (Long skillId : request.getSkillIds()) {
-            skillRepository.addTeacherSkill(request.getTeacherId(), skillId);
+            skillRepository.addTeacherSkill(teacherId, skillId);
         }
     }
 
-    private void validateTeacherProfile(CompleteTeacherProfileRequest request) {
-        if (request.getTeacherId() == null) {
+    private void validateTeacherProfile(Long teacherId, CompleteTeacherProfileRequest request) {
+        if (teacherId == null) {
             throw new IllegalArgumentException("Teacher id is required");
+        }
+
+        if (request == null) {
+            throw new IllegalArgumentException("Request cannot be null");
         }
 
         if (request.getBio() == null || request.getBio().isBlank()) {

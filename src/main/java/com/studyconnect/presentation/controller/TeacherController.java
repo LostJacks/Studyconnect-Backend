@@ -23,9 +23,11 @@ public class TeacherController {
         return teacherService.getAllTeachers();
     }
 
-    @PutMapping("/profile")
-    public ResponseEntity<Void> completeProfile(@RequestBody CompleteTeacherProfileRequest request) {
-        teacherService.completeTeacherProfile(request);
+    @PutMapping("/{teacherId}/profile")
+    public ResponseEntity<Void> completeProfile(
+            @PathVariable Long teacherId,
+            @RequestBody CompleteTeacherProfileRequest request) {
+        teacherService.completeTeacherProfile(teacherId, request);
         return ResponseEntity.ok().build();
     }
 }

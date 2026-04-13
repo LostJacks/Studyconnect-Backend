@@ -74,7 +74,7 @@ public class BookingService {
         );
     }
 
-    public BookingRequest acceptBooking(Long bookingId, Long teacherId) {
+    public BookingRequest updateBookingStatus(Long bookingId, Long teacherId, String status) {
 
         if (bookingId == null) {
             throw new IllegalArgumentException("BookingId cannot be null");
@@ -84,6 +84,10 @@ public class BookingService {
             throw new IllegalArgumentException("TeacherId cannot be null");
         }
 
+        if (status == null || status.isBlank()) {
+            throw new IllegalArgumentException("Status cannot be null or empty");
+        }
+
         BookingRequest bookingRequest = bookingRepository.findById(bookingId);
 
         if (bookingRequest == null) {
@@ -91,7 +95,7 @@ public class BookingService {
         }
 
         if (bookingRequest.getStatus() != BookingStatus.PENDING) {
-            throw new IllegalArgumentException("Only pending booking requests can be accepted");
+            throw new IllegalArgumentException("Only pending booking requests can be updated");
         }
 
         Long slotId = bookingRepository.findSlotIdByBookingId(bookingId);
@@ -116,72 +120,38 @@ public class BookingService {
             throw new IllegalArgumentException("Only the targeted teacher can respond to this booking request");
         }
 
-        if (slot.isBooked()) {
-            throw new IllegalArgumentException("This slot is already booked");
+        BookingStatus newStatus;
+
+        try {
+            newStatus = BookingStatus.valueOf(status.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("Status must be ACCEPTED or REJECTED");
         }
 
-        bookingRepository.updateStatus(bookingId, BookingStatus.ACCEPTED);
-        availabilityRepository.updateBookedStatus(slotId, true);
+        if (newStatus != BookingStatus.ACCEPTED && newStatus != BookingStatus.REJECTED) {
+            throw new IllegalArgumentException("Status must be ACCEPTED or REJECTED");
+        }
+
+        if (newStatus == BookingStatus.ACCEPTED) {
+            if (slot.isBooked()) {
+                throw new IllegalArgumentException("This slot is already booked");
+            }
+
+            availabilityRepository.updateBookedStatus(slotId, true);
+        }
+
+        if (newStatus == BookingStatus.REJECTED) {
+            availabilityRepository.updateBookedStatus(slotId, false);
+        }
+
+        bookingRepository.updateStatus(bookingId, newStatus);
 
         return new BookingRequest(
                 bookingRequest.getStartTime(),
                 bookingRequest.getEndTime(),
                 bookingRequest.getTitle(),
                 bookingRequest.getDescription(),
-                BookingStatus.ACCEPTED
-        );
-    }
-
-    public BookingRequest rejectBooking(Long bookingId, Long teacherId) {
-
-        if (bookingId == null) {
-            throw new IllegalArgumentException("BookingId cannot be null");
-        }
-
-        if (teacherId == null) {
-            throw new IllegalArgumentException("TeacherId cannot be null");
-        }
-
-        BookingRequest bookingRequest = bookingRepository.findById(bookingId);
-
-        if (bookingRequest == null) {
-            throw new IllegalArgumentException("Booking request not found");
-        }
-
-        if (bookingRequest.getStatus() != BookingStatus.PENDING) {
-            throw new IllegalArgumentException("Only pending booking requests can be rejected");
-        }
-
-        Long slotId = bookingRepository.findSlotIdByBookingId(bookingId);
-
-        if (slotId == null) {
-            throw new IllegalArgumentException("Availability slot does not exist");
-        }
-
-        AvailabilitySlot slot = availabilityRepository.findById(slotId);
-
-        if (slot == null) {
-            throw new IllegalArgumentException("Availability slot does not exist");
-        }
-
-        Long slotTeacherId = availabilityRepository.findTeacherIdBySlotId(slotId);
-
-        if (slotTeacherId == null) {
-            throw new IllegalArgumentException("Availability slot does not exist");
-        }
-
-        if (!slotTeacherId.equals(teacherId)) {
-            throw new IllegalArgumentException("Only the targeted teacher can respond to this booking request");
-        }
-
-        bookingRepository.updateStatus(bookingId, BookingStatus.REJECTED);
-
-        return new BookingRequest(
-                bookingRequest.getStartTime(),
-                bookingRequest.getEndTime(),
-                bookingRequest.getTitle(),
-                bookingRequest.getDescription(),
-                BookingStatus.REJECTED
+                newStatus
         );
     }
 }

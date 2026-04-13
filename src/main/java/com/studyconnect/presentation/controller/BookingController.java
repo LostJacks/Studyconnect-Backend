@@ -3,6 +3,7 @@ package com.studyconnect.presentation.controller;
 import com.studyconnect.business.service.BookingService;
 import com.studyconnect.domain.model.BookingRequest;
 import com.studyconnect.presentation.dto.CreateBookingRequest;
+import com.studyconnect.presentation.dto.UpdateBookingStatusRequest;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -20,17 +21,15 @@ public class BookingController {
         return bookingService.createBooking(request);
     }
 
-    @PutMapping("/{bookingId}/accept")
-    public BookingRequest acceptBooking(
+    @PatchMapping("/{bookingId}")
+    public BookingRequest updateBookingStatus(
             @PathVariable Long bookingId,
-            @RequestParam Long teacherId) {
-        return bookingService.acceptBooking(bookingId, teacherId);
-    }
+            @RequestBody UpdateBookingStatusRequest request) {
 
-    @PutMapping("/{bookingId}/reject")
-    public BookingRequest rejectBooking(
-            @PathVariable Long bookingId,
-            @RequestParam Long teacherId) {
-        return bookingService.rejectBooking(bookingId, teacherId);
+        return bookingService.updateBookingStatus(
+                bookingId,
+                request.getTeacherId(),
+                request.getStatus()
+        );
     }
 }
