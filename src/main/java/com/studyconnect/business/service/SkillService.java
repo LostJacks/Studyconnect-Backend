@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 @Service
-public class SkillService {
+public class SkillService implements ISkillService {
 
     private final ISkillRepository skillRepository;
     private final ITeacherSkillRepository teacherSkillRepository;
@@ -35,11 +35,6 @@ public class SkillService {
     }
 
     public void addSkillToTeacher(Long teacherId, Long skillId) {
-
-        if (teacherId == null || skillId == null) {
-            throw new IllegalArgumentException("TeacherId and SkillId must be provided");
-        }
-
         User user = userRepository.findById(teacherId);
 
         if (user == null) {
@@ -60,11 +55,6 @@ public class SkillService {
     }
 
     public List<Skill> getSkillsByTeacher(Long teacherId) {
-
-        if (teacherId == null) {
-            throw new IllegalArgumentException("TeacherId cannot be null");
-        }
-
         return teacherSkillRepository.findSkillsByTeacherId(teacherId);
     }
 }

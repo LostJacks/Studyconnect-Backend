@@ -1,19 +1,23 @@
 package com.studyconnect.presentation.dto;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
-
-import java.time.LocalTime;
 
 @Getter
 @Setter
 public class CreateBookingRequest {
 
+    @NotNull(message = "SlotId is required")
     private Long slotId;
-    private Long requesterId;
-    private LocalTime startTime;
-    private LocalTime endTime;
-    private String title;
-    private String description;
 
+    @NotNull(message = "RequesterId is required")
+    private Long requesterId;
+
+    @NotBlank(message = "Title is required")
+    private String title;
+
+    @NotBlank(message = "Description is required")
+    private String description;
 }

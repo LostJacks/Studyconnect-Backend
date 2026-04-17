@@ -6,13 +6,13 @@ import com.studyconnect.data.irepository.IUserRepository;
 import com.studyconnect.domain.model.AvailabilitySlot;
 import com.studyconnect.domain.model.BookingRequest;
 import com.studyconnect.domain.model.BookingStatus;
-import com.studyconnect.domain.model.User;
 import com.studyconnect.domain.model.Role;
+import com.studyconnect.domain.model.User;
 import com.studyconnect.presentation.dto.CreateBookingRequest;
 import org.springframework.stereotype.Service;
 
 @Service
-public class BookingService {
+public class BookingService implements IBookingService {
 
     private final IBookingRepository bookingRepository;
     private final IAvailabilityRepository availabilityRepository;
@@ -26,23 +26,12 @@ public class BookingService {
         this.userRepository = userRepository;
     }
 
+    @Override
     public BookingRequest createBooking(CreateBookingRequest request) {
-
-        if (request == null) {
-            throw new IllegalArgumentException("Request cannot be null");
-        }
-
-        if (request.getSlotId() == null ||
-                request.getRequesterId() == null ||
-                request.getTitle() == null || request.getTitle().isBlank() ||
-                request.getDescription() == null || request.getDescription().isBlank()) {
-            throw new IllegalArgumentException("All fields must be filled in");
-        }
-
         User requester = userRepository.findById(request.getRequesterId());
 
         if (requester == null) {
-            throw new IllegalArgumentException("Requester does not exist");
+            throw new IllegalArgumentException("Student does not exist");
         }
 
         if (requester.getRole() != Role.STUDENT) {
@@ -74,20 +63,8 @@ public class BookingService {
         );
     }
 
-    public BookingRequest updateBookingStatus(Long bookingId, Long teacherId, String status) {
-
-        if (bookingId == null) {
-            throw new IllegalArgumentException("BookingId cannot be null");
-        }
-
-        if (teacherId == null) {
-            throw new IllegalArgumentException("TeacherId cannot be null");
-        }
-
-        if (status == null || status.isBlank()) {
-            throw new IllegalArgumentException("Status cannot be null or empty");
-        }
-
+    @Override
+    public BookingRequest updateBookingStatus(Long bookingId, Long teacherId, BookingStatus status) {
         BookingRequest bookingRequest = bookingRepository.findById(bookingId);
 
         if (bookingRequest == null) {
@@ -120,19 +97,11 @@ public class BookingService {
             throw new IllegalArgumentException("Only the targeted teacher can respond to this booking request");
         }
 
-        BookingStatus newStatus;
-
-        try {
-            newStatus = BookingStatus.valueOf(status.toUpperCase());
-        } catch (IllegalArgumentException e) {
+        if (status != BookingStatus.ACCEPTED && status != BookingStatus.REJECTED) {
             throw new IllegalArgumentException("Status must be ACCEPTED or REJECTED");
         }
 
-        if (newStatus != BookingStatus.ACCEPTED && newStatus != BookingStatus.REJECTED) {
-            throw new IllegalArgumentException("Status must be ACCEPTED or REJECTED");
-        }
-
-        if (newStatus == BookingStatus.ACCEPTED) {
+        if (status == BookingStatus.ACCEPTED) {
             if (slot.isBooked()) {
                 throw new IllegalArgumentException("This slot is already booked");
             }
@@ -140,18 +109,18 @@ public class BookingService {
             availabilityRepository.updateBookedStatus(slotId, true);
         }
 
-        if (newStatus == BookingStatus.REJECTED) {
+        if (status == BookingStatus.REJECTED) {
             availabilityRepository.updateBookedStatus(slotId, false);
         }
 
-        bookingRepository.updateStatus(bookingId, newStatus);
+        bookingRepository.updateStatus(bookingId, status);
 
         return new BookingRequest(
                 bookingRequest.getStartTime(),
                 bookingRequest.getEndTime(),
                 bookingRequest.getTitle(),
                 bookingRequest.getDescription(),
-                newStatus
+                status
         );
     }
 }

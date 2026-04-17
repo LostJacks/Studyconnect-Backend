@@ -4,6 +4,7 @@ import com.studyconnect.business.service.BookingService;
 import com.studyconnect.domain.model.BookingRequest;
 import com.studyconnect.presentation.dto.CreateBookingRequest;
 import com.studyconnect.presentation.dto.UpdateBookingStatusRequest;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -17,14 +18,14 @@ public class BookingController {
     }
 
     @PostMapping
-    public BookingRequest createBooking(@RequestBody CreateBookingRequest request) {
+    public BookingRequest createBooking(@Valid @RequestBody CreateBookingRequest request) {
         return bookingService.createBooking(request);
     }
 
     @PatchMapping("/{bookingId}")
     public BookingRequest updateBookingStatus(
             @PathVariable Long bookingId,
-            @RequestBody UpdateBookingStatusRequest request) {
+            @Valid @RequestBody UpdateBookingStatusRequest request) {
 
         return bookingService.updateBookingStatus(
                 bookingId,

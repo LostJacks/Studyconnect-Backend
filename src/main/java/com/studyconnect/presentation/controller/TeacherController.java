@@ -1,8 +1,9 @@
 package com.studyconnect.presentation.controller;
 
-import com.studyconnect.business.service.TeacherService;
+import com.studyconnect.business.service.ITeacherService;
 import com.studyconnect.presentation.dto.CompleteTeacherProfileRequest;
 import com.studyconnect.presentation.dto.TeacherResponse;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -12,9 +13,9 @@ import java.util.List;
 @RequestMapping("/teachers")
 public class TeacherController {
 
-    private final TeacherService teacherService;
+    private final ITeacherService teacherService;
 
-    public TeacherController(TeacherService teacherService) {
+    public TeacherController(ITeacherService teacherService) {
         this.teacherService = teacherService;
     }
 
@@ -26,7 +27,7 @@ public class TeacherController {
     @PutMapping("/{teacherId}/profile")
     public ResponseEntity<Void> completeProfile(
             @PathVariable Long teacherId,
-            @RequestBody CompleteTeacherProfileRequest request) {
+            @Valid @RequestBody CompleteTeacherProfileRequest request) {
         teacherService.completeTeacherProfile(teacherId, request);
         return ResponseEntity.ok().build();
     }

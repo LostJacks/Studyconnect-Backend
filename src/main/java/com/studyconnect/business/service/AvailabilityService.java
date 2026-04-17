@@ -11,7 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service
-public class AvailabilityService {
+public class AvailabilityService implements IAvailabilityService {
 
     private final IAvailabilityRepository availabilityRepository;
 
@@ -19,20 +19,8 @@ public class AvailabilityService {
         this.availabilityRepository = availabilityRepository;
     }
 
+    @Override
     public List<AvailabilitySlot> createAvailability(CreateAvailabilityRequest request) {
-
-        if (request == null) {
-            throw new IllegalArgumentException("Request cannot be null");
-        }
-
-        if (request.getTeacherId() == null ||
-                request.getDate() == null ||
-                request.getStartTime() == null ||
-                request.getEndTime() == null) {
-
-            throw new IllegalArgumentException("All fields must be filled in");
-        }
-
         if (!request.getStartTime().isBefore(request.getEndTime())) {
             throw new IllegalArgumentException("Start time must be before end time");
         }
@@ -68,12 +56,8 @@ public class AvailabilityService {
         return createdSlots;
     }
 
+    @Override
     public List<AvailabilitySlot> getTeacherAvailability(Long teacherId) {
-
-        if (teacherId == null) {
-            throw new IllegalArgumentException("TeacherId cannot be null");
-        }
-
         return availabilityRepository.findByTeacherId(teacherId);
     }
 }

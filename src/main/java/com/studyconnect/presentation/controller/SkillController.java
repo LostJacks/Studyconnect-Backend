@@ -1,6 +1,6 @@
 package com.studyconnect.presentation.controller;
 
-import com.studyconnect.business.service.SkillService;
+import com.studyconnect.business.service.ISkillService;
 import com.studyconnect.domain.model.Skill;
 import com.studyconnect.presentation.dto.SkillResponse;
 import org.springframework.web.bind.annotation.*;
@@ -10,9 +10,9 @@ import java.util.List;
 @RestController
 public class SkillController {
 
-    private final SkillService skillService;
+    private final ISkillService skillService;
 
-    public SkillController(SkillService skillService) {
+    public SkillController(ISkillService skillService) {
         this.skillService = skillService;
     }
 

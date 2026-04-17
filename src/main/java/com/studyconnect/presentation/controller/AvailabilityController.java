@@ -1,8 +1,9 @@
 package com.studyconnect.presentation.controller;
 
-import com.studyconnect.business.service.AvailabilityService;
+import com.studyconnect.business.service.IAvailabilityService;
 import com.studyconnect.domain.model.AvailabilitySlot;
 import com.studyconnect.presentation.dto.CreateAvailabilityRequest;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -10,15 +11,15 @@ import java.util.List;
 @RestController
 public class AvailabilityController {
 
-    private final AvailabilityService availabilityService;
+    private final IAvailabilityService availabilityService;
 
-    public AvailabilityController(AvailabilityService availabilityService) {
+    public AvailabilityController(IAvailabilityService availabilityService) {
         this.availabilityService = availabilityService;
     }
 
     @PostMapping("/availability")
     public List<AvailabilitySlot> createAvailability(
-            @RequestBody CreateAvailabilityRequest request) {
+            @Valid @RequestBody CreateAvailabilityRequest request) {
 
         return availabilityService.createAvailability(request);
     }
