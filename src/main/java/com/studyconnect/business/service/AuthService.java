@@ -11,7 +11,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
-public class AuthService {
+public class AuthService implements IAuthService {
 
     private final IUserRepository userRepository;
     private final BCryptPasswordEncoder passwordEncoder;
@@ -23,19 +23,8 @@ public class AuthService {
         this.passwordEncoder = new BCryptPasswordEncoder();
     }
 
+    @Override
     public AuthResponse register(RegisterRequest request) {
-
-        if (request == null) {
-            throw new IllegalArgumentException("Request cannot be null");
-        }
-
-        if (request.getName() == null || request.getName().isBlank() ||
-                request.getEmail() == null || request.getEmail().isBlank() ||
-                request.getPassword() == null || request.getPassword().isBlank() ||
-                request.getRole() == null) {
-            throw new IllegalArgumentException("All fields must be filled in");
-        }
-
         String password = request.getPassword();
 
         if (!password.matches("^(?=.*[A-Z])(?=.*\\d).{6,}$")) {
@@ -71,17 +60,8 @@ public class AuthService {
         );
     }
 
+    @Override
     public AuthResponse login(LoginRequest request) {
-
-        if (request == null) {
-            throw new IllegalArgumentException("Request cannot be null");
-        }
-
-        if (request.getEmail() == null || request.getEmail().isBlank() ||
-                request.getPassword() == null || request.getPassword().isBlank()) {
-            throw new IllegalArgumentException("All fields must be filled in");
-        }
-
         UserEntity userEntity = userRepository.findEntityByEmail(request.getEmail());
         if (userEntity == null) {
             throw new IllegalArgumentException("Invalid email or password");
