@@ -6,6 +6,7 @@ import com.studyconnect.data.mapper.AvailabilitySlotMapper;
 import com.studyconnect.domain.model.AvailabilitySlot;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
+import java.time.LocalDate;
 
 import java.util.List;
 
@@ -93,6 +94,35 @@ public class AvailabilityRepository implements IAvailabilityRepository {
         );
 
         return AvailabilitySlotMapper.toDomain(entity);
+    }
+
+    @Override
+    public List<AvailabilitySlot> findByTeacherAndDate(Long teacherId, LocalDate date) {
+        String sql = """
+            SELECT id, teacher_id, date, start_time, end_time, booked
+            FROM availability_slot
+            WHERE teacher_id = ?
+            AND date = ?
+            AND booked = FALSE
+            """;
+
+        List<AvailabilitySlotEntity> entities = jdbcTemplate.query(
+                sql,
+                (rs, rowNum) -> new AvailabilitySlotEntity(
+                        rs.getLong("id"),
+                        rs.getLong("teacher_id"),
+                        rs.getDate("date").toLocalDate(),
+                        rs.getTime("start_time").toLocalTime(),
+                        rs.getTime("end_time").toLocalTime(),
+                        rs.getBoolean("booked")
+                ),
+                teacherId,
+                date
+        );
+
+        return entities.stream()
+                .map(AvailabilitySlotMapper::toDomain)
+                .toList();
     }
 
     @Override

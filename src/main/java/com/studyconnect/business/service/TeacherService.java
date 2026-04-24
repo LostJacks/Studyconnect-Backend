@@ -1,6 +1,7 @@
 package com.studyconnect.business.service;
 
 import com.studyconnect.data.entity.UserEntity;
+import com.studyconnect.data.irepository.IAvailabilityRepository;
 import com.studyconnect.data.irepository.ISkillRepository;
 import com.studyconnect.data.irepository.IUserRepository;
 import com.studyconnect.presentation.dto.CompleteTeacherProfileRequest;
@@ -8,6 +9,8 @@ import com.studyconnect.presentation.dto.SkillResponse;
 import com.studyconnect.presentation.dto.TeacherResponse;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -16,10 +19,15 @@ public class TeacherService implements ITeacherService {
 
     private final IUserRepository userRepository;
     private final ISkillRepository skillRepository;
+    private final IAvailabilityRepository availabilityRepository;
 
-    public TeacherService(IUserRepository userRepository, ISkillRepository skillRepository) {
+    public TeacherService(
+            IUserRepository userRepository,
+            ISkillRepository skillRepository,
+            IAvailabilityRepository availabilityRepository) {
         this.userRepository = userRepository;
         this.skillRepository = skillRepository;
+        this.availabilityRepository = availabilityRepository;
     }
 
     @Override
@@ -27,6 +35,23 @@ public class TeacherService implements ITeacherService {
         return userRepository.findAll()
                 .stream()
                 .filter(user -> user.getRole().equals("TEACHER"))
+                .map(this::mapToTeacherResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<TeacherResponse> getAvailableTeachers(LocalDate date, LocalTime startTime) {
+        return userRepository.findAll()
+                .stream()
+                .filter(user -> user.getRole().equals("TEACHER"))
+                .filter(user -> availabilityRepository
+                        .findByTeacherAndDate(user.getId(), date)
+                        .stream()
+                        .anyMatch(slot ->
+                                slot.getStartTime().equals(startTime) &&
+                                        !slot.isBooked()
+                        )
+                )
                 .map(this::mapToTeacherResponse)
                 .collect(Collectors.toList());
     }

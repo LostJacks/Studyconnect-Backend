@@ -7,6 +7,8 @@ import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 
 @RestController
@@ -22,6 +24,14 @@ public class TeacherController {
     @GetMapping
     public List<TeacherResponse> getTeachers() {
         return teacherService.getAllTeachers();
+    }
+
+    @GetMapping("/available")
+    public List<TeacherResponse> getAvailableTeachers(
+            @RequestParam LocalDate date,
+            @RequestParam LocalTime startTime) {
+
+        return teacherService.getAvailableTeachers(date, startTime);
     }
 
     @PutMapping("/{teacherId}/profile")

@@ -2,6 +2,7 @@ package com.studyconnect.data.irepository;
 
 import com.studyconnect.domain.model.AvailabilitySlot;
 
+import java.time.LocalDate;
 import java.util.List;
 
 public interface IAvailabilityRepository {
@@ -9,6 +10,8 @@ public interface IAvailabilityRepository {
     AvailabilitySlot saveForTeacher(AvailabilitySlot slot, Long teacherId);
 
     List<AvailabilitySlot> findByTeacherId(Long teacherId);
+
+    List<AvailabilitySlot> findByTeacherAndDate(Long teacherId, LocalDate date);
 
     AvailabilitySlot findById(Long id);
 
