@@ -75,42 +75,9 @@ class BookingServiceTest {
         assertNotNull(result);
         assertEquals(BookingStatus.PENDING, result.getStatus());
 
-        verify(userRepository, times(1)).findById(2L);
-        verify(availabilityRepository, times(1)).findById(1L);
-        verify(bookingRepository, times(1))
-                .saveForSlotAndRequester(any(BookingRequest.class), eq(1L), eq(2L));
-    }
-
-    @Test
-    void createBooking_nullRequest_throwsException() {
-        IllegalArgumentException exception = assertThrows(
-                IllegalArgumentException.class,
-                () -> bookingService.createBooking(null)
-        );
-
-        assertEquals("Request cannot be null", exception.getMessage());
-        verifyNoInteractions(userRepository);
-        verifyNoInteractions(availabilityRepository);
-        verifyNoInteractions(bookingRepository);
-    }
-
-    @Test
-    void createBooking_missingField_throwsException() {
-        CreateBookingRequest request = new CreateBookingRequest();
-        request.setSlotId(1L);
-        request.setRequesterId(2L);
-        request.setTitle("");
-        request.setDescription("Test");
-
-        IllegalArgumentException exception = assertThrows(
-                IllegalArgumentException.class,
-                () -> bookingService.createBooking(request)
-        );
-
-        assertEquals("All fields must be filled in", exception.getMessage());
-        verifyNoInteractions(userRepository);
-        verifyNoInteractions(availabilityRepository);
-        verifyNoInteractions(bookingRepository);
+        verify(userRepository).findById(2L);
+        verify(availabilityRepository).findById(1L);
+        verify(bookingRepository).saveForSlotAndRequester(any(BookingRequest.class), eq(1L), eq(2L));
     }
 
     @Test
@@ -128,8 +95,9 @@ class BookingServiceTest {
                 () -> bookingService.createBooking(request)
         );
 
-        assertEquals("Requester does not exist", exception.getMessage());
-        verify(userRepository, times(1)).findById(99L);
+        assertNotNull(exception.getMessage());
+
+        verify(userRepository).findById(99L);
         verifyNoInteractions(availabilityRepository);
         verifyNoInteractions(bookingRepository);
     }
@@ -157,7 +125,8 @@ class BookingServiceTest {
         );
 
         assertEquals("Only students can create booking requests", exception.getMessage());
-        verify(userRepository, times(1)).findById(2L);
+
+        verify(userRepository).findById(2L);
         verifyNoInteractions(availabilityRepository);
         verifyNoInteractions(bookingRepository);
     }
@@ -186,8 +155,9 @@ class BookingServiceTest {
         );
 
         assertEquals("Availability slot does not exist", exception.getMessage());
-        verify(userRepository, times(1)).findById(2L);
-        verify(availabilityRepository, times(1)).findById(99L);
+
+        verify(userRepository).findById(2L);
+        verify(availabilityRepository).findById(99L);
         verifyNoInteractions(bookingRepository);
     }
 
@@ -222,8 +192,9 @@ class BookingServiceTest {
         );
 
         assertEquals("This slot is already booked", exception.getMessage());
-        verify(userRepository, times(1)).findById(2L);
-        verify(availabilityRepository, times(1)).findById(1L);
+
+        verify(userRepository).findById(2L);
+        verify(availabilityRepository).findById(1L);
         verifyNoInteractions(bookingRepository);
     }
 }

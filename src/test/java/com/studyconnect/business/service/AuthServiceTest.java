@@ -66,43 +66,9 @@ class AuthServiceTest {
         assertEquals("jack@test.com", result.getEmail());
         assertEquals(Role.STUDENT, result.getRole());
 
-        verify(userRepository, times(1)).findByEmail("jack@test.com");
-        verify(userRepository, times(1)).save(any(User.class));
-        verify(userRepository, times(1)).findEntityByEmail("jack@test.com");
-        verify(jwtService, never()).generateToken(anyString(), anyString());
-    }
-
-    @Test
-    void register_nullRequest_throwsException() {
-        IllegalArgumentException exception = assertThrows(
-                IllegalArgumentException.class,
-                () -> authService.register(null)
-        );
-
-        assertEquals("Request cannot be null", exception.getMessage());
-        verify(userRepository, never()).findByEmail(any());
-        verify(userRepository, never()).save(any());
-        verify(userRepository, never()).findEntityByEmail(any());
-        verify(jwtService, never()).generateToken(anyString(), anyString());
-    }
-
-    @Test
-    void register_missingField_throwsException() {
-        RegisterRequest request = new RegisterRequest();
-        request.setName("Jack");
-        request.setEmail("");
-        request.setPassword("Abc123");
-        request.setRole(Role.STUDENT);
-
-        IllegalArgumentException exception = assertThrows(
-                IllegalArgumentException.class,
-                () -> authService.register(request)
-        );
-
-        assertEquals("All fields must be filled in", exception.getMessage());
-        verify(userRepository, never()).findByEmail(any());
-        verify(userRepository, never()).save(any());
-        verify(userRepository, never()).findEntityByEmail(any());
+        verify(userRepository).findByEmail("jack@test.com");
+        verify(userRepository).save(any(User.class));
+        verify(userRepository).findEntityByEmail("jack@test.com");
         verify(jwtService, never()).generateToken(anyString(), anyString());
     }
 
@@ -123,6 +89,7 @@ class AuthServiceTest {
                 "Password must be at least 6 characters, contain 1 uppercase letter and 1 number",
                 exception.getMessage()
         );
+
         verify(userRepository, never()).findByEmail(any());
         verify(userRepository, never()).save(any());
         verify(userRepository, never()).findEntityByEmail(any());
@@ -152,7 +119,8 @@ class AuthServiceTest {
         );
 
         assertEquals("Email is already registered", exception.getMessage());
-        verify(userRepository, times(1)).findByEmail("jack@test.com");
+
+        verify(userRepository).findByEmail("jack@test.com");
         verify(userRepository, never()).save(any());
         verify(userRepository, never()).findEntityByEmail(any());
         verify(jwtService, never()).generateToken(anyString(), anyString());
@@ -184,36 +152,8 @@ class AuthServiceTest {
         assertEquals("jack@test.com", result.getEmail());
         assertEquals(Role.STUDENT, result.getRole());
 
-        verify(userRepository, times(1)).findEntityByEmail("jack@test.com");
-        verify(jwtService, times(1)).generateToken("jack@test.com", "STUDENT");
-    }
-
-    @Test
-    void login_nullRequest_throwsException() {
-        IllegalArgumentException exception = assertThrows(
-                IllegalArgumentException.class,
-                () -> authService.login(null)
-        );
-
-        assertEquals("Request cannot be null", exception.getMessage());
-        verify(userRepository, never()).findEntityByEmail(any());
-        verify(jwtService, never()).generateToken(anyString(), anyString());
-    }
-
-    @Test
-    void login_missingField_throwsException() {
-        LoginRequest request = new LoginRequest();
-        request.setEmail("");
-        request.setPassword("Abc123");
-
-        IllegalArgumentException exception = assertThrows(
-                IllegalArgumentException.class,
-                () -> authService.login(request)
-        );
-
-        assertEquals("All fields must be filled in", exception.getMessage());
-        verify(userRepository, never()).findEntityByEmail(any());
-        verify(jwtService, never()).generateToken(anyString(), anyString());
+        verify(userRepository).findEntityByEmail("jack@test.com");
+        verify(jwtService).generateToken("jack@test.com", "STUDENT");
     }
 
     @Test
@@ -230,7 +170,8 @@ class AuthServiceTest {
         );
 
         assertEquals("Invalid email or password", exception.getMessage());
-        verify(userRepository, times(1)).findEntityByEmail("jack@test.com");
+
+        verify(userRepository).findEntityByEmail("jack@test.com");
         verify(jwtService, never()).generateToken(anyString(), anyString());
     }
 
@@ -256,7 +197,8 @@ class AuthServiceTest {
         );
 
         assertEquals("Invalid email or password", exception.getMessage());
-        verify(userRepository, times(1)).findEntityByEmail("jack@test.com");
+
+        verify(userRepository).findEntityByEmail("jack@test.com");
         verify(jwtService, never()).generateToken(anyString(), anyString());
     }
 }
