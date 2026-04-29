@@ -2,6 +2,7 @@ stages:
   - build
   - test
   - package
+  - deploy
 
 cache:
   key: gradle-cache
@@ -38,3 +39,16 @@ package_backend:
     paths:
       - build/libs/*.jar
     expire_in: 1 week
+
+deploy_backend:
+  stage: deploy
+  tags:
+    - local
+  script:
+    - if not exist deploy mkdir deploy
+    - copy build\libs\*.jar deploy\
+    - echo Backend jar copied to deploy folder
+  dependencies:
+    - package_backend
+  only:
+    - main
