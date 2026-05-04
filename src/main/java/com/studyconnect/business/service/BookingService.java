@@ -8,8 +8,11 @@ import com.studyconnect.domain.model.BookingRequest;
 import com.studyconnect.domain.model.BookingStatus;
 import com.studyconnect.domain.model.Role;
 import com.studyconnect.domain.model.User;
+import com.studyconnect.presentation.dto.BookingSessionResponse;
 import com.studyconnect.presentation.dto.CreateBookingRequest;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 public class BookingService implements IBookingService {
@@ -61,6 +64,17 @@ public class BookingService implements IBookingService {
                 request.getSlotId(),
                 request.getRequesterId()
         );
+    }
+
+    @Override
+    public List<BookingSessionResponse> getBookingsByUser(Long userId) {
+        User user = userRepository.findById(userId);
+
+        if (user == null) {
+            throw new IllegalArgumentException("User does not exist");
+        }
+
+        return bookingRepository.findBookingsByUserId(userId);
     }
 
     @Override

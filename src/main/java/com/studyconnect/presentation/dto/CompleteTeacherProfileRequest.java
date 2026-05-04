@@ -14,6 +14,9 @@ public class CompleteTeacherProfileRequest {
     @NotBlank(message = "Bio is required")
     private String bio;
 
+    @NotBlank(message = "Profile image is required")
+    private String profileImageUrl;
+
     @NotEmpty(message = "At least one skill is required")
     private List<Long> skillIds;
 }

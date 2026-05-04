@@ -11,5 +11,6 @@ public class TeacherResponse {
     private Long id;
     private String name;
     private String bio;
+    private String profileImageUrl;
     private List<SkillResponse> skills;
 }

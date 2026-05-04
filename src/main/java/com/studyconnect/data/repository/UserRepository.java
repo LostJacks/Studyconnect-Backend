@@ -54,7 +54,7 @@ public class UserRepository implements IUserRepository {
     public User findByEmail(String email) {
 
         String sql = """
-                SELECT id, name, email, password_hash, role
+                SELECT id, name, email, password_hash, role, profile_image_url
                 FROM users
                 WHERE email = ?
                 """;
@@ -68,7 +68,10 @@ public class UserRepository implements IUserRepository {
                                 rs.getString("name"),
                                 rs.getString("email"),
                                 rs.getString("password_hash"),
-                                rs.getString("role")
+                                rs.getString("role"),
+                                null,
+                                null,
+                                rs.getString("profile_image_url")
                         );
                     }
                     return null;
@@ -82,7 +85,7 @@ public class UserRepository implements IUserRepository {
     @Override
     public UserEntity findEntityByEmail(String email) {
         String sql = """
-                SELECT id, name, email, password_hash, role, bio
+                SELECT id, name, email, password_hash, role, bio, profile_image_url
                 FROM users
                 WHERE email = ?
                 """;
@@ -98,7 +101,8 @@ public class UserRepository implements IUserRepository {
                                 rs.getString("password_hash"),
                                 rs.getString("role"),
                                 rs.getString("bio"),
-                                null
+                                null,
+                                rs.getString("profile_image_url")
                         );
                     }
                     return null;
@@ -111,7 +115,7 @@ public class UserRepository implements IUserRepository {
     public User findById(Long id) {
 
         String sql = """
-                SELECT id, name, email, password_hash, role
+                SELECT id, name, email, password_hash, role, profile_image_url
                 FROM users
                 WHERE id = ?
                 """;
@@ -125,7 +129,10 @@ public class UserRepository implements IUserRepository {
                                 rs.getString("name"),
                                 rs.getString("email"),
                                 rs.getString("password_hash"),
-                                rs.getString("role")
+                                rs.getString("role"),
+                                null,
+                                null,
+                                rs.getString("profile_image_url")
                         );
                     }
                     return null;
@@ -137,10 +144,21 @@ public class UserRepository implements IUserRepository {
     }
 
     @Override
+    public void updateProfileImage(Long userId, String profileImageUrl) {
+        String sql = """
+            UPDATE users
+            SET profile_image_url = ?
+            WHERE id = ?
+            """;
+
+        jdbcTemplate.update(sql, profileImageUrl, userId);
+    }
+
+    @Override
     public List<UserEntity> findAll() {
 
         String sql = """
-                SELECT id, name, email, password_hash, role, bio
+                SELECT id, name, email, password_hash, role, bio, profile_image_url
                 FROM users
                 """;
 
@@ -153,7 +171,8 @@ public class UserRepository implements IUserRepository {
                         rs.getString("password_hash"),
                         rs.getString("role"),
                         rs.getString("bio"),
-                        null
+                        null,
+                        rs.getString("profile_image_url")
                 )
         );
     }

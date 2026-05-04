@@ -29,7 +29,10 @@ public class UserMapper {
                 user.getName(),
                 user.getEmail(),
                 user.getPasswordHash(),
-                user.getRole().name()
+                user.getRole().name(),
+                null,
+                null,
+                null
         );
     }
 }

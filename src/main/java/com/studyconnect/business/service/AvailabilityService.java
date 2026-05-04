@@ -1,7 +1,9 @@
 package com.studyconnect.business.service;
 
+import com.studyconnect.data.entity.AvailabilitySlotEntity;
 import com.studyconnect.data.irepository.IAvailabilityRepository;
 import com.studyconnect.domain.model.AvailabilitySlot;
+import com.studyconnect.presentation.dto.AvailabilitySlotResponse;
 import com.studyconnect.presentation.dto.CreateAvailabilityRequest;
 import org.springframework.stereotype.Service;
 
@@ -57,7 +59,16 @@ public class AvailabilityService implements IAvailabilityService {
     }
 
     @Override
-    public List<AvailabilitySlot> getTeacherAvailability(Long teacherId) {
-        return availabilityRepository.findByTeacherId(teacherId);
+    public List<AvailabilitySlotResponse> getTeacherAvailability(Long teacherId) {
+        return availabilityRepository.findEntitiesByTeacherId(teacherId)
+                .stream()
+                .map(entity -> new AvailabilitySlotResponse(
+                        entity.getId(),
+                        entity.getDate(),
+                        entity.getStartTime(),
+                        entity.getEndTime(),
+                        entity.isBooked()
+                ))
+                .toList();
     }
 }

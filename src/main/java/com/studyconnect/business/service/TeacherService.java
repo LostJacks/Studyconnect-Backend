@@ -59,6 +59,7 @@ public class TeacherService implements ITeacherService {
     @Override
     public void completeTeacherProfile(Long teacherId, CompleteTeacherProfileRequest request) {
         userRepository.updateBio(teacherId, request.getBio());
+        userRepository.updateProfileImage(teacherId, request.getProfileImageUrl());
 
         skillRepository.deleteTeacherSkillsByTeacherId(teacherId);
 
@@ -74,6 +75,7 @@ public class TeacherService implements ITeacherService {
                 user.getId(),
                 user.getName(),
                 user.getBio(),
+                user.getProfileImageUrl(),
                 skills
         );
     }

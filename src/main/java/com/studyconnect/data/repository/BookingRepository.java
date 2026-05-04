@@ -5,6 +5,7 @@ import com.studyconnect.data.irepository.IBookingRepository;
 import com.studyconnect.data.mapper.BookingRequestMapper;
 import com.studyconnect.domain.model.BookingRequest;
 import com.studyconnect.domain.model.BookingStatus;
+import com.studyconnect.presentation.dto.BookingSessionResponse;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
@@ -72,6 +73,51 @@ public class BookingRepository implements IBookingRepository {
         );
 
         return BookingRequestMapper.toDomain(entity);
+    }
+    @Override
+    public List<BookingSessionResponse> findBookingsByUserId(Long userId) {
+        String sql = """
+            SELECT
+                br.id AS booking_id,
+                br.requester_id AS student_id,
+                student.name AS student_name,
+                av.teacher_id AS teacher_id,
+                teacher.name AS teacher_name,
+                br.slot_id,
+                av.date,
+                br.start_time,
+                br.end_time,
+                br.title,
+                br.description,
+                br.status
+            FROM booking_request br
+            JOIN availability_slot av ON br.slot_id = av.id
+            JOIN users student ON br.requester_id = student.id
+            JOIN users teacher ON av.teacher_id = teacher.id
+            WHERE br.requester_id = ?
+            OR av.teacher_id = ?
+            ORDER BY av.date DESC, br.start_time DESC
+            """;
+
+        return jdbcTemplate.query(
+                sql,
+                (rs, rowNum) -> new BookingSessionResponse(
+                        rs.getLong("booking_id"),
+                        rs.getLong("student_id"),
+                        rs.getString("student_name"),
+                        rs.getLong("teacher_id"),
+                        rs.getString("teacher_name"),
+                        rs.getLong("slot_id"),
+                        rs.getDate("date").toLocalDate(),
+                        rs.getTime("start_time").toLocalTime(),
+                        rs.getTime("end_time").toLocalTime(),
+                        rs.getString("title"),
+                        rs.getString("description"),
+                        BookingStatus.valueOf(rs.getString("status"))
+                ),
+                userId,
+                userId
+        );
     }
 
     @Override

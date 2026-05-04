@@ -2,10 +2,13 @@ package com.studyconnect.presentation.controller;
 
 import com.studyconnect.business.service.BookingService;
 import com.studyconnect.domain.model.BookingRequest;
+import com.studyconnect.presentation.dto.BookingSessionResponse;
 import com.studyconnect.presentation.dto.CreateBookingRequest;
 import com.studyconnect.presentation.dto.UpdateBookingStatusRequest;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/bookings")
@@ -18,7 +21,9 @@ public class BookingController {
     }
 
     @PostMapping
-    public BookingRequest createBooking(@Valid @RequestBody CreateBookingRequest request) {
+    public BookingRequest createBooking(
+            @Valid @RequestBody CreateBookingRequest request) {
+
         return bookingService.createBooking(request);
     }
 
@@ -32,5 +37,12 @@ public class BookingController {
                 request.getTeacherId(),
                 request.getStatus()
         );
+    }
+
+    @GetMapping("/users/{userId}")
+    public List<BookingSessionResponse> getBookingsByUser(
+            @PathVariable Long userId) {
+
+        return bookingService.getBookingsByUser(userId);
     }
 }

@@ -56,7 +56,8 @@ public class AuthService implements IAuthService {
                 null,
                 savedUserEntity.getName(),
                 savedUserEntity.getEmail(),
-                Role.valueOf(savedUserEntity.getRole())
+                Role.valueOf(savedUserEntity.getRole()),
+                savedUserEntity.getProfileImageUrl()
         );
     }
 
@@ -86,7 +87,8 @@ public class AuthService implements IAuthService {
                 token,
                 userEntity.getName(),
                 userEntity.getEmail(),
-                Role.valueOf(userEntity.getRole())
+                Role.valueOf(userEntity.getRole()),
+                userEntity.getProfileImageUrl()
         );
     }
 }
