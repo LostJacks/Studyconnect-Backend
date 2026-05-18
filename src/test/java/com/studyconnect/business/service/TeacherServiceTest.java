@@ -4,15 +4,12 @@ import com.studyconnect.data.entity.UserEntity;
 import com.studyconnect.data.irepository.IAvailabilityRepository;
 import com.studyconnect.data.irepository.ISkillRepository;
 import com.studyconnect.data.irepository.IUserRepository;
-import com.studyconnect.domain.model.AvailabilitySlot;
 import com.studyconnect.presentation.dto.CompleteTeacherProfileRequest;
 import com.studyconnect.presentation.dto.SkillResponse;
 import com.studyconnect.presentation.dto.TeacherResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.time.LocalDate;
-import java.time.LocalTime;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -77,116 +74,24 @@ class TeacherServiceTest {
     }
 
     @Test
-    void getAvailableTeachers_teacherHasMatchingAvailableSlot_returnsTeacher() {
-        LocalDate date = LocalDate.of(2026, 3, 20);
-        LocalTime startTime = LocalTime.of(10, 0);
-
-        UserEntity teacher = new UserEntity(
-                1L,
-                "Teacher User",
-                "teacher@test.com",
+    void getAllTeachers_noTeachers_returnsEmptyList() {
+        UserEntity student = new UserEntity(
+                2L,
+                "Student User",
+                "student@test.com",
                 "password",
-                "TEACHER"
+                "STUDENT"
         );
 
-        AvailabilitySlot slot = new AvailabilitySlot(
-                date,
-                LocalTime.of(10, 0),
-                LocalTime.of(10, 30),
-                false
-        );
+        when(userRepository.findAll()).thenReturn(List.of(student));
 
-        List<SkillResponse> skills = List.of(
-                new SkillResponse(1L, "Java")
-        );
-
-        when(userRepository.findAll()).thenReturn(List.of(teacher));
-        when(availabilityRepository.findByTeacherAndDate(1L, date))
-                .thenReturn(List.of(slot));
-        when(skillRepository.findSkillsByTeacherId(1L)).thenReturn(skills);
-
-        List<TeacherResponse> result =
-                teacherService.getAvailableTeachers(date, startTime);
-
-        assertNotNull(result);
-        assertEquals(1, result.size());
-        assertEquals(1L, result.get(0).getId());
-        assertEquals("Teacher User", result.get(0).getName());
-        assertEquals(skills, result.get(0).getSkills());
-
-        verify(userRepository).findAll();
-        verify(availabilityRepository).findByTeacherAndDate(1L, date);
-        verify(skillRepository).findSkillsByTeacherId(1L);
-    }
-
-    @Test
-    void getAvailableTeachers_slotIsBooked_returnsEmptyList() {
-        LocalDate date = LocalDate.of(2026, 3, 20);
-        LocalTime startTime = LocalTime.of(10, 0);
-
-        UserEntity teacher = new UserEntity(
-                1L,
-                "Teacher User",
-                "teacher@test.com",
-                "password",
-                "TEACHER"
-        );
-
-        AvailabilitySlot bookedSlot = new AvailabilitySlot(
-                date,
-                LocalTime.of(10, 0),
-                LocalTime.of(10, 30),
-                true
-        );
-
-        when(userRepository.findAll()).thenReturn(List.of(teacher));
-        when(availabilityRepository.findByTeacherAndDate(1L, date))
-                .thenReturn(List.of(bookedSlot));
-
-        List<TeacherResponse> result =
-                teacherService.getAvailableTeachers(date, startTime);
+        List<TeacherResponse> result = teacherService.getAllTeachers();
 
         assertNotNull(result);
         assertTrue(result.isEmpty());
 
         verify(userRepository).findAll();
-        verify(availabilityRepository).findByTeacherAndDate(1L, date);
-        verify(skillRepository, never()).findSkillsByTeacherId(anyLong());
-    }
-
-    @Test
-    void getAvailableTeachers_slotTimeDoesNotMatch_returnsEmptyList() {
-        LocalDate date = LocalDate.of(2026, 3, 20);
-        LocalTime startTime = LocalTime.of(11, 0);
-
-        UserEntity teacher = new UserEntity(
-                1L,
-                "Teacher User",
-                "teacher@test.com",
-                "password",
-                "TEACHER"
-        );
-
-        AvailabilitySlot slot = new AvailabilitySlot(
-                date,
-                LocalTime.of(10, 0),
-                LocalTime.of(10, 30),
-                false
-        );
-
-        when(userRepository.findAll()).thenReturn(List.of(teacher));
-        when(availabilityRepository.findByTeacherAndDate(1L, date))
-                .thenReturn(List.of(slot));
-
-        List<TeacherResponse> result =
-                teacherService.getAvailableTeachers(date, startTime);
-
-        assertNotNull(result);
-        assertTrue(result.isEmpty());
-
-        verify(userRepository).findAll();
-        verify(availabilityRepository).findByTeacherAndDate(1L, date);
-        verify(skillRepository, never()).findSkillsByTeacherId(anyLong());
+        verifyNoInteractions(skillRepository);
     }
 
     @Test
