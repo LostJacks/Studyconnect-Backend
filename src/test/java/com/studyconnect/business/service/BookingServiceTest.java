@@ -9,6 +9,7 @@ import com.studyconnect.domain.model.BookingStatus;
 import com.studyconnect.domain.model.Role;
 import com.studyconnect.domain.model.User;
 import com.studyconnect.presentation.dto.CreateBookingRequest;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

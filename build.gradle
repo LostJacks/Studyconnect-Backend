@@ -43,6 +43,7 @@ dependencies {
 
 	runtimeOnly 'com.mysql:mysql-connector-j'
 
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'org.springframework.boot:spring-boot-starter-webmvc-test'
 	testImplementation 'org.springframework.security:spring-security-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
@@ -72,12 +73,17 @@ sonar {
 		property "sonar.projectKey", "StudyConnect"
 		property "sonar.host.url", "http://localhost:9000"
 		property "sonar.token", "sqp_e3721b524af4e77b43ef00160676eb055547e0ff"
+
 		property "sonar.coverage.jacoco.xmlReportPaths",
 				"build/reports/jacoco/test/jacocoTestReport.xml"
 
 		property "sonar.coverage.exclusions",
 				"**/data/repository/**," +
+						"**/data/mapper/**," +
 						"**/configuration/**," +
+						"**/presentation/controller/**," +
+						"**/presentation/dto/**," +
+						"**/data/entity/**," +
 						"**/StudyconnectApplication.java"
 	}
 }

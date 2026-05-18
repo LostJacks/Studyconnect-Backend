@@ -4,9 +4,10 @@ import com.studyconnect.data.entity.UserEntity;
 import com.studyconnect.data.irepository.IUserRepository;
 import com.studyconnect.domain.model.Role;
 import com.studyconnect.domain.model.User;
-import com.studyconnect.presentation.dto.AuthResponse;
-import com.studyconnect.presentation.dto.LoginRequest;
 import com.studyconnect.presentation.dto.RegisterRequest;
+import com.studyconnect.presentation.dto.LoginRequest;
+import com.studyconnect.presentation.dto.AuthResponse;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;

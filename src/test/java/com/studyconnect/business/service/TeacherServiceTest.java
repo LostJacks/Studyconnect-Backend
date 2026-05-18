@@ -9,7 +9,6 @@ import com.studyconnect.presentation.dto.SkillResponse;
 import com.studyconnect.presentation.dto.TeacherResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
