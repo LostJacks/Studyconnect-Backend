@@ -3,11 +3,13 @@ package com.studyconnect.presentation.dto;
 import com.studyconnect.domain.model.BookingStatus;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.Setter;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
 
 @Getter
+@Setter
 @AllArgsConstructor
 public class BookingSessionResponse {
 
@@ -28,4 +30,6 @@ public class BookingSessionResponse {
     private String description;
 
     private BookingStatus status;
+
+    private String profileImageUrl;
 }

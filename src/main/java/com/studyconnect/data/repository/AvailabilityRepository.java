@@ -47,6 +47,11 @@ public class AvailabilityRepository implements IAvailabilityRepository {
                 FROM availability_slot
                 WHERE teacher_id = ?
                 AND booked = FALSE
+                AND (
+                    date > CURDATE()
+                    OR (date = CURDATE() AND start_time > CURTIME())
+                )
+                ORDER BY date, start_time
                 """;
 
         List<AvailabilitySlotEntity> entities = jdbcTemplate.query(
@@ -67,6 +72,11 @@ public class AvailabilityRepository implements IAvailabilityRepository {
                 FROM availability_slot
                 WHERE teacher_id = ?
                 AND booked = FALSE
+                AND (
+                    date > CURDATE()
+                    OR (date = CURDATE() AND start_time > CURTIME())
+                )
+                ORDER BY date, start_time
                 """;
 
         return jdbcTemplate.query(
@@ -106,6 +116,11 @@ public class AvailabilityRepository implements IAvailabilityRepository {
                 WHERE teacher_id = ?
                 AND date = ?
                 AND booked = FALSE
+                AND (
+                    date > CURDATE()
+                    OR (date = CURDATE() AND start_time > CURTIME())
+                )
+                ORDER BY date, start_time
                 """;
 
         List<AvailabilitySlotEntity> entities = jdbcTemplate.query(

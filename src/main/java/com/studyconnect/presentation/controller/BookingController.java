@@ -6,6 +6,7 @@ import com.studyconnect.presentation.dto.BookingSessionResponse;
 import com.studyconnect.presentation.dto.CreateBookingRequest;
 import com.studyconnect.presentation.dto.UpdateBookingStatusRequest;
 import jakarta.validation.Valid;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -37,6 +38,16 @@ public class BookingController {
                 request.getTeacherId(),
                 request.getStatus()
         );
+    }
+
+    @PatchMapping("/{bookingId}/cancel")
+    public ResponseEntity<BookingRequest> cancelBooking(
+            @PathVariable Long bookingId) {
+
+        BookingRequest bookingRequest =
+                bookingService.cancelBooking(bookingId);
+
+        return ResponseEntity.ok(bookingRequest);
     }
 
     @GetMapping("/users/{userId}")

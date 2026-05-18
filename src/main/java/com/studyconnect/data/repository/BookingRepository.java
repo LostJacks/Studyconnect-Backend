@@ -77,27 +77,31 @@ public class BookingRepository implements IBookingRepository {
     @Override
     public List<BookingSessionResponse> findBookingsByUserId(Long userId) {
         String sql = """
-            SELECT
-                br.id AS booking_id,
-                br.requester_id AS student_id,
-                student.name AS student_name,
-                av.teacher_id AS teacher_id,
-                teacher.name AS teacher_name,
-                br.slot_id,
-                av.date,
-                br.start_time,
-                br.end_time,
-                br.title,
-                br.description,
-                br.status
-            FROM booking_request br
-            JOIN availability_slot av ON br.slot_id = av.id
-            JOIN users student ON br.requester_id = student.id
-            JOIN users teacher ON av.teacher_id = teacher.id
-            WHERE br.requester_id = ?
-            OR av.teacher_id = ?
-            ORDER BY av.date DESC, br.start_time DESC
-            """;
+        SELECT
+            br.id AS booking_id,
+            br.requester_id AS student_id,
+            student.name AS student_name,
+            av.teacher_id AS teacher_id,
+            teacher.name AS teacher_name,
+            br.slot_id,
+            av.date,
+            br.start_time,
+            br.end_time,
+            br.title,
+            br.description,
+            br.status,
+            CASE
+                WHEN br.requester_id = ? THEN teacher.profile_image_url
+                ELSE student.profile_image_url
+            END AS profile_image_url
+        FROM booking_request br
+        JOIN availability_slot av ON br.slot_id = av.id
+        JOIN users student ON br.requester_id = student.id
+        JOIN users teacher ON av.teacher_id = teacher.id
+        WHERE br.requester_id = ?
+        OR av.teacher_id = ?
+        ORDER BY av.date DESC, br.start_time DESC
+        """;
 
         return jdbcTemplate.query(
                 sql,
@@ -113,8 +117,10 @@ public class BookingRepository implements IBookingRepository {
                         rs.getTime("end_time").toLocalTime(),
                         rs.getString("title"),
                         rs.getString("description"),
-                        BookingStatus.valueOf(rs.getString("status"))
+                        BookingStatus.valueOf(rs.getString("status")),
+                        rs.getString("profile_image_url")
                 ),
+                userId,
                 userId,
                 userId
         );

@@ -30,6 +30,21 @@ public class BookingService implements IBookingService {
     }
 
     @Override
+    public BookingRequest cancelBooking(Long bookingId) {
+        BookingRequest bookingRequest = bookingRepository.findById(bookingId);
+
+        if (bookingRequest == null) {
+            throw new IllegalArgumentException("Booking request not found");
+        }
+
+        bookingRequest.cancel();
+
+        bookingRepository.updateStatus(bookingId, bookingRequest.getStatus());
+
+        return bookingRequest;
+    }
+
+    @Override
     public BookingRequest createBooking(CreateBookingRequest request) {
         User requester = userRepository.findById(request.getRequesterId());
 
@@ -55,8 +70,7 @@ public class BookingService implements IBookingService {
                 slot.getStartTime(),
                 slot.getEndTime(),
                 request.getTitle(),
-                request.getDescription(),
-                BookingStatus.PENDING
+                request.getDescription()
         );
 
         return bookingRepository.saveForSlotAndRequester(
@@ -74,7 +88,24 @@ public class BookingService implements IBookingService {
             throw new IllegalArgumentException("User does not exist");
         }
 
-        return bookingRepository.findBookingsByUserId(userId);
+        List<BookingSessionResponse> bookings =
+                bookingRepository.findBookingsByUserId(userId);
+
+        for (BookingSessionResponse booking : bookings) {
+            if (
+                    booking.getStatus() == BookingStatus.ACCEPTED &&
+                            booking.getDate().isBefore(java.time.LocalDate.now())
+            ) {
+                bookingRepository.updateStatus(
+                        booking.getId(),
+                        BookingStatus.COMPLETED
+                );
+
+                booking.setStatus(BookingStatus.COMPLETED);
+            }
+        }
+
+        return bookings;
     }
 
     @Override
@@ -85,7 +116,7 @@ public class BookingService implements IBookingService {
             throw new IllegalArgumentException("Booking request not found");
         }
 
-        if (bookingRequest.getStatus() != BookingStatus.PENDING) {
+        if (!bookingRequest.isPending()) {
             throw new IllegalArgumentException("Only pending booking requests can be updated");
         }
 
@@ -111,30 +142,22 @@ public class BookingService implements IBookingService {
             throw new IllegalArgumentException("Only the targeted teacher can respond to this booking request");
         }
 
-        if (status != BookingStatus.ACCEPTED && status != BookingStatus.REJECTED) {
-            throw new IllegalArgumentException("Status must be ACCEPTED or REJECTED");
-        }
-
         if (status == BookingStatus.ACCEPTED) {
             if (slot.isBooked()) {
                 throw new IllegalArgumentException("This slot is already booked");
             }
 
+            bookingRequest.accept();
             availabilityRepository.updateBookedStatus(slotId, true);
-        }
-
-        if (status == BookingStatus.REJECTED) {
+        } else if (status == BookingStatus.REJECTED) {
+            bookingRequest.reject();
             availabilityRepository.updateBookedStatus(slotId, false);
+        } else {
+            throw new IllegalArgumentException("Status must be ACCEPTED or REJECTED");
         }
 
-        bookingRepository.updateStatus(bookingId, status);
+        bookingRepository.updateStatus(bookingId, bookingRequest.getStatus());
 
-        return new BookingRequest(
-                bookingRequest.getStartTime(),
-                bookingRequest.getEndTime(),
-                bookingRequest.getTitle(),
-                bookingRequest.getDescription(),
-                status
-        );
+        return bookingRequest;
     }
 }

@@ -13,4 +13,5 @@ public interface IBookingService {
     BookingRequest updateBookingStatus(Long bookingId, Long teacherId, BookingStatus status);
 
     List<BookingSessionResponse> getBookingsByUser(Long userId);
+    BookingRequest cancelBooking(Long bookingId);
 }

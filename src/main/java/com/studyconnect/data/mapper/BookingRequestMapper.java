@@ -29,6 +29,14 @@ public class BookingRequestMapper {
             return null;
         }
 
+        if (slotId == null) {
+            throw new IllegalArgumentException("Slot id cannot be null");
+        }
+
+        if (requesterId == null) {
+            throw new IllegalArgumentException("Requester id cannot be null");
+        }
+
         return new BookingRequestEntity(
                 null,
                 slotId,
