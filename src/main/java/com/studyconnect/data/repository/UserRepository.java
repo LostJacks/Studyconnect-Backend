@@ -12,6 +12,14 @@ import java.util.List;
 @Repository
 public class UserRepository implements IUserRepository {
 
+    private static final String COLUMN_ID = "id";
+    private static final String COLUMN_NAME = "name";
+    private static final String COLUMN_EMAIL = "email";
+    private static final String COLUMN_PASSWORD_HASH = "password_hash";
+    private static final String COLUMN_ROLE = "role";
+    private static final String COLUMN_BIO = "bio";
+    private static final String COLUMN_PROFILE_IMAGE_URL = "profile_image_url";
+
     private final JdbcTemplate jdbcTemplate;
 
     public UserRepository(JdbcTemplate jdbcTemplate) {
@@ -31,7 +39,6 @@ public class UserRepository implements IUserRepository {
 
     @Override
     public User save(User user) {
-
         UserEntity entity = UserMapper.toEntity(user);
 
         String sql = """
@@ -52,7 +59,6 @@ public class UserRepository implements IUserRepository {
 
     @Override
     public User findByEmail(String email) {
-
         String sql = """
                 SELECT id, name, email, password_hash, role, profile_image_url
                 FROM users
@@ -64,14 +70,14 @@ public class UserRepository implements IUserRepository {
                 rs -> {
                     if (rs.next()) {
                         return new UserEntity(
-                                rs.getLong("id"),
-                                rs.getString("name"),
-                                rs.getString("email"),
-                                rs.getString("password_hash"),
-                                rs.getString("role"),
+                                rs.getLong(COLUMN_ID),
+                                rs.getString(COLUMN_NAME),
+                                rs.getString(COLUMN_EMAIL),
+                                rs.getString(COLUMN_PASSWORD_HASH),
+                                rs.getString(COLUMN_ROLE),
                                 null,
                                 null,
-                                rs.getString("profile_image_url")
+                                rs.getString(COLUMN_PROFILE_IMAGE_URL)
                         );
                     }
                     return null;
@@ -95,14 +101,14 @@ public class UserRepository implements IUserRepository {
                 rs -> {
                     if (rs.next()) {
                         return new UserEntity(
-                                rs.getLong("id"),
-                                rs.getString("name"),
-                                rs.getString("email"),
-                                rs.getString("password_hash"),
-                                rs.getString("role"),
-                                rs.getString("bio"),
+                                rs.getLong(COLUMN_ID),
+                                rs.getString(COLUMN_NAME),
+                                rs.getString(COLUMN_EMAIL),
+                                rs.getString(COLUMN_PASSWORD_HASH),
+                                rs.getString(COLUMN_ROLE),
+                                rs.getString(COLUMN_BIO),
                                 null,
-                                rs.getString("profile_image_url")
+                                rs.getString(COLUMN_PROFILE_IMAGE_URL)
                         );
                     }
                     return null;
@@ -113,7 +119,6 @@ public class UserRepository implements IUserRepository {
 
     @Override
     public User findById(Long id) {
-
         String sql = """
                 SELECT id, name, email, password_hash, role, profile_image_url
                 FROM users
@@ -125,14 +130,14 @@ public class UserRepository implements IUserRepository {
                 rs -> {
                     if (rs.next()) {
                         return new UserEntity(
-                                rs.getLong("id"),
-                                rs.getString("name"),
-                                rs.getString("email"),
-                                rs.getString("password_hash"),
-                                rs.getString("role"),
+                                rs.getLong(COLUMN_ID),
+                                rs.getString(COLUMN_NAME),
+                                rs.getString(COLUMN_EMAIL),
+                                rs.getString(COLUMN_PASSWORD_HASH),
+                                rs.getString(COLUMN_ROLE),
                                 null,
                                 null,
-                                rs.getString("profile_image_url")
+                                rs.getString(COLUMN_PROFILE_IMAGE_URL)
                         );
                     }
                     return null;
@@ -156,7 +161,6 @@ public class UserRepository implements IUserRepository {
 
     @Override
     public List<UserEntity> findAll() {
-
         String sql = """
                 SELECT id, name, email, password_hash, role, bio, profile_image_url
                 FROM users
@@ -165,14 +169,14 @@ public class UserRepository implements IUserRepository {
         return jdbcTemplate.query(
                 sql,
                 (rs, rowNum) -> new UserEntity(
-                        rs.getLong("id"),
-                        rs.getString("name"),
-                        rs.getString("email"),
-                        rs.getString("password_hash"),
-                        rs.getString("role"),
-                        rs.getString("bio"),
+                        rs.getLong(COLUMN_ID),
+                        rs.getString(COLUMN_NAME),
+                        rs.getString(COLUMN_EMAIL),
+                        rs.getString(COLUMN_PASSWORD_HASH),
+                        rs.getString(COLUMN_ROLE),
+                        rs.getString(COLUMN_BIO),
                         null,
-                        rs.getString("profile_image_url")
+                        rs.getString(COLUMN_PROFILE_IMAGE_URL)
                 )
         );
     }

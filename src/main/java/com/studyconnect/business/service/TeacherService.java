@@ -12,10 +12,11 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class TeacherService implements ITeacherService {
+
+    private static final String ROLE_TEACHER = "TEACHER";
 
     private final IUserRepository userRepository;
     private final ISkillRepository skillRepository;
@@ -34,16 +35,16 @@ public class TeacherService implements ITeacherService {
     public List<TeacherResponse> getAllTeachers() {
         return userRepository.findAll()
                 .stream()
-                .filter(user -> user.getRole().equals("TEACHER"))
+                .filter(user -> ROLE_TEACHER.equals(user.getRole()))
                 .map(this::mapToTeacherResponse)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     @Override
     public List<TeacherResponse> getAvailableTeachers(LocalDate date, LocalTime startTime) {
         return userRepository.findAll()
                 .stream()
-                .filter(user -> user.getRole().equals("TEACHER"))
+                .filter(user -> ROLE_TEACHER.equals(user.getRole()))
                 .filter(user -> availabilityRepository
                         .findByTeacherId(user.getId())
                         .stream()
@@ -56,7 +57,7 @@ public class TeacherService implements ITeacherService {
                         })
                 )
                 .map(this::mapToTeacherResponse)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     @Override

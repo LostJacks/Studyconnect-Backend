@@ -6,6 +6,10 @@ import com.studyconnect.domain.model.User;
 
 public class UserMapper {
 
+    private UserMapper() {
+
+    }
+
     public static User toDomain(UserEntity entity) {
         if (entity == null) {
             return null;

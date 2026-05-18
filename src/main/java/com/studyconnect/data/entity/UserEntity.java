@@ -4,6 +4,7 @@ import lombok.Getter;
 
 @Getter
 public class UserEntity {
+
     private Long id;
     private String name;
     private String email;
@@ -20,16 +21,19 @@ public class UserEntity {
             String passwordHash,
             String role
     ) {
-        this.id = id;
-        this.name = name;
-        this.email = email;
-        this.passwordHash = passwordHash;
-        this.role = role;
-        this.bio = null;
-        this.skills = null;
-        this.profileImageUrl = null;
+        this(
+                id,
+                name,
+                email,
+                passwordHash,
+                role,
+                null,
+                null,
+                null
+        );
     }
 
+    @SuppressWarnings("java:S107")
     public UserEntity(
             Long id,
             String name,

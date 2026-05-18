@@ -5,6 +5,9 @@ import com.studyconnect.domain.model.Skill;
 
 public class SkillMapper {
 
+    private SkillMapper() {
+    }
+
     public static Skill toDomain(SkillEntity entity) {
         if (entity == null) {
             return null;

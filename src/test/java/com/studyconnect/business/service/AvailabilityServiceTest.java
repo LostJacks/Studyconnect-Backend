@@ -7,15 +7,15 @@ import com.studyconnect.presentation.dto.AvailabilitySlotResponse;
 import com.studyconnect.presentation.dto.CreateAvailabilityRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 class AvailabilityServiceTest {
@@ -66,58 +66,29 @@ class AvailabilityServiceTest {
                 .saveForTeacher(any(AvailabilitySlot.class), eq(1L));
     }
 
-    @Test
-    void createAvailability_startAfterEnd_throwsException() {
+    @ParameterizedTest
+    @CsvSource({
+            "12:00,10:00,Start time must be before end time",
+            "10:00,10:00,Start time must be before end time",
+            "10:00,10:45,Time range must be divisible into 30-minute slots"
+    })
+    void createAvailability_invalidTimeRange_throwsException(
+            String startTime,
+            String endTime,
+            String expectedMessage
+    ) {
         CreateAvailabilityRequest request = new CreateAvailabilityRequest();
         request.setTeacherId(1L);
         request.setDate(LocalDate.of(2026, 3, 12));
-        request.setStartTime(LocalTime.of(12, 0));
-        request.setEndTime(LocalTime.of(10, 0));
+        request.setStartTime(LocalTime.parse(startTime));
+        request.setEndTime(LocalTime.parse(endTime));
 
         IllegalArgumentException exception = assertThrows(
                 IllegalArgumentException.class,
                 () -> availabilityService.createAvailability(request)
         );
 
-        assertEquals("Start time must be before end time", exception.getMessage());
-
-        verify(availabilityRepository, never())
-                .saveForTeacher(any(AvailabilitySlot.class), anyLong());
-    }
-
-    @Test
-    void createAvailability_startEqualsEnd_throwsException() {
-        CreateAvailabilityRequest request = new CreateAvailabilityRequest();
-        request.setTeacherId(1L);
-        request.setDate(LocalDate.of(2026, 3, 12));
-        request.setStartTime(LocalTime.of(10, 0));
-        request.setEndTime(LocalTime.of(10, 0));
-
-        IllegalArgumentException exception = assertThrows(
-                IllegalArgumentException.class,
-                () -> availabilityService.createAvailability(request)
-        );
-
-        assertEquals("Start time must be before end time", exception.getMessage());
-
-        verify(availabilityRepository, never())
-                .saveForTeacher(any(AvailabilitySlot.class), anyLong());
-    }
-
-    @Test
-    void createAvailability_timeRangeNotDivisibleByThirty_throwsException() {
-        CreateAvailabilityRequest request = new CreateAvailabilityRequest();
-        request.setTeacherId(1L);
-        request.setDate(LocalDate.of(2026, 3, 12));
-        request.setStartTime(LocalTime.of(10, 0));
-        request.setEndTime(LocalTime.of(10, 45));
-
-        IllegalArgumentException exception = assertThrows(
-                IllegalArgumentException.class,
-                () -> availabilityService.createAvailability(request)
-        );
-
-        assertEquals("Time range must be divisible into 30-minute slots", exception.getMessage());
+        assertEquals(expectedMessage, exception.getMessage());
 
         verify(availabilityRepository, never())
                 .saveForTeacher(any(AvailabilitySlot.class), anyLong());

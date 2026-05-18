@@ -5,6 +5,10 @@ import com.studyconnect.domain.model.AvailabilitySlot;
 
 public class AvailabilitySlotMapper {
 
+    private AvailabilitySlotMapper() {
+
+    }
+
     public static AvailabilitySlot toDomain(AvailabilitySlotEntity entity) {
         if (entity == null) {
             return null;

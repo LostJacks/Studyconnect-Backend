@@ -14,6 +14,22 @@ import java.util.List;
 @Repository
 public class BookingRepository implements IBookingRepository {
 
+    private static final String COLUMN_ID = "id";
+    private static final String COLUMN_SLOT_ID = "slot_id";
+    private static final String COLUMN_REQUESTER_ID = "requester_id";
+    private static final String COLUMN_START_TIME = "start_time";
+    private static final String COLUMN_END_TIME = "end_time";
+    private static final String COLUMN_TITLE = "title";
+    private static final String COLUMN_DESCRIPTION = "description";
+    private static final String COLUMN_STATUS = "status";
+    private static final String COLUMN_BOOKING_ID = "booking_id";
+    private static final String COLUMN_STUDENT_ID = "student_id";
+    private static final String COLUMN_STUDENT_NAME = "student_name";
+    private static final String COLUMN_TEACHER_ID = "teacher_id";
+    private static final String COLUMN_TEACHER_NAME = "teacher_name";
+    private static final String COLUMN_DATE = "date";
+    private static final String COLUMN_PROFILE_IMAGE_URL = "profile_image_url";
+
     private final JdbcTemplate jdbcTemplate;
 
     public BookingRepository(JdbcTemplate jdbcTemplate) {
@@ -57,14 +73,14 @@ public class BookingRepository implements IBookingRepository {
                 rs -> {
                     if (rs.next()) {
                         return new BookingRequestEntity(
-                                rs.getLong("id"),
-                                rs.getLong("slot_id"),
-                                rs.getLong("requester_id"),
-                                rs.getTime("start_time").toLocalTime(),
-                                rs.getTime("end_time").toLocalTime(),
-                                rs.getString("title"),
-                                rs.getString("description"),
-                                rs.getString("status")
+                                rs.getLong(COLUMN_ID),
+                                rs.getLong(COLUMN_SLOT_ID),
+                                rs.getLong(COLUMN_REQUESTER_ID),
+                                rs.getTime(COLUMN_START_TIME).toLocalTime(),
+                                rs.getTime(COLUMN_END_TIME).toLocalTime(),
+                                rs.getString(COLUMN_TITLE),
+                                rs.getString(COLUMN_DESCRIPTION),
+                                rs.getString(COLUMN_STATUS)
                         );
                     }
                     return null;
@@ -74,6 +90,7 @@ public class BookingRepository implements IBookingRepository {
 
         return BookingRequestMapper.toDomain(entity);
     }
+
     @Override
     public List<BookingSessionResponse> findBookingsByUserId(Long userId) {
         String sql = """
@@ -106,19 +123,19 @@ public class BookingRepository implements IBookingRepository {
         return jdbcTemplate.query(
                 sql,
                 (rs, rowNum) -> new BookingSessionResponse(
-                        rs.getLong("booking_id"),
-                        rs.getLong("student_id"),
-                        rs.getString("student_name"),
-                        rs.getLong("teacher_id"),
-                        rs.getString("teacher_name"),
-                        rs.getLong("slot_id"),
-                        rs.getDate("date").toLocalDate(),
-                        rs.getTime("start_time").toLocalTime(),
-                        rs.getTime("end_time").toLocalTime(),
-                        rs.getString("title"),
-                        rs.getString("description"),
-                        BookingStatus.valueOf(rs.getString("status")),
-                        rs.getString("profile_image_url")
+                        rs.getLong(COLUMN_BOOKING_ID),
+                        rs.getLong(COLUMN_STUDENT_ID),
+                        rs.getString(COLUMN_STUDENT_NAME),
+                        rs.getLong(COLUMN_TEACHER_ID),
+                        rs.getString(COLUMN_TEACHER_NAME),
+                        rs.getLong(COLUMN_SLOT_ID),
+                        rs.getDate(COLUMN_DATE).toLocalDate(),
+                        rs.getTime(COLUMN_START_TIME).toLocalTime(),
+                        rs.getTime(COLUMN_END_TIME).toLocalTime(),
+                        rs.getString(COLUMN_TITLE),
+                        rs.getString(COLUMN_DESCRIPTION),
+                        BookingStatus.valueOf(rs.getString(COLUMN_STATUS)),
+                        rs.getString(COLUMN_PROFILE_IMAGE_URL)
                 ),
                 userId,
                 userId,
@@ -136,7 +153,7 @@ public class BookingRepository implements IBookingRepository {
 
         List<Long> results = jdbcTemplate.query(
                 sql,
-                (rs, rowNum) -> rs.getLong("slot_id"),
+                (rs, rowNum) -> rs.getLong(COLUMN_SLOT_ID),
                 bookingId
         );
 

@@ -6,6 +6,9 @@ import com.studyconnect.domain.model.BookingStatus;
 
 public class BookingRequestMapper {
 
+    private BookingRequestMapper() {
+    }
+
     public static BookingRequest toDomain(BookingRequestEntity entity) {
         if (entity == null) {
             return null;

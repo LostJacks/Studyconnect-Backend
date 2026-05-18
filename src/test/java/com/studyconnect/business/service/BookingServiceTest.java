@@ -8,14 +8,12 @@ import com.studyconnect.domain.model.BookingRequest;
 import com.studyconnect.domain.model.BookingStatus;
 import com.studyconnect.domain.model.Role;
 import com.studyconnect.domain.model.User;
-import com.studyconnect.presentation.dto.BookingSessionResponse;
 import com.studyconnect.presentation.dto.CreateBookingRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
