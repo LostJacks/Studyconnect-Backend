@@ -1,7 +1,9 @@
 package com.studyconnect.business.service;
 
+import com.studyconnect.data.entity.AvailabilitySlotEntity;
 import com.studyconnect.data.irepository.IAvailabilityRepository;
 import com.studyconnect.domain.model.AvailabilitySlot;
+import com.studyconnect.presentation.dto.AvailabilitySlotResponse;
 import com.studyconnect.presentation.dto.CreateAvailabilityRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -13,6 +15,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 class AvailabilityServiceTest {
@@ -71,10 +74,12 @@ class AvailabilityServiceTest {
         request.setStartTime(LocalTime.of(12, 0));
         request.setEndTime(LocalTime.of(10, 0));
 
-        assertThrows(
+        IllegalArgumentException exception = assertThrows(
                 IllegalArgumentException.class,
                 () -> availabilityService.createAvailability(request)
         );
+
+        assertEquals("Start time must be before end time", exception.getMessage());
 
         verify(availabilityRepository, never())
                 .saveForTeacher(any(AvailabilitySlot.class), anyLong());
@@ -88,19 +93,42 @@ class AvailabilityServiceTest {
         request.setStartTime(LocalTime.of(10, 0));
         request.setEndTime(LocalTime.of(10, 0));
 
-        assertThrows(
+        IllegalArgumentException exception = assertThrows(
                 IllegalArgumentException.class,
                 () -> availabilityService.createAvailability(request)
         );
+
+        assertEquals("Start time must be before end time", exception.getMessage());
 
         verify(availabilityRepository, never())
                 .saveForTeacher(any(AvailabilitySlot.class), anyLong());
     }
 
     @Test
-    void getTeacherAvailability_valid_returnsList() {
-        List<AvailabilitySlot> slots = List.of(
-                new AvailabilitySlot(
+    void createAvailability_timeRangeNotDivisibleByThirty_throwsException() {
+        CreateAvailabilityRequest request = new CreateAvailabilityRequest();
+        request.setTeacherId(1L);
+        request.setDate(LocalDate.of(2026, 3, 12));
+        request.setStartTime(LocalTime.of(10, 0));
+        request.setEndTime(LocalTime.of(10, 45));
+
+        IllegalArgumentException exception = assertThrows(
+                IllegalArgumentException.class,
+                () -> availabilityService.createAvailability(request)
+        );
+
+        assertEquals("Time range must be divisible into 30-minute slots", exception.getMessage());
+
+        verify(availabilityRepository, never())
+                .saveForTeacher(any(AvailabilitySlot.class), anyLong());
+    }
+
+    @Test
+    void getTeacherAvailability_valid_returnsAvailabilitySlotResponses() {
+        List<AvailabilitySlotEntity> slotEntities = List.of(
+                new AvailabilitySlotEntity(
+                        1L,
+                        1L,
                         LocalDate.of(2026, 3, 12),
                         LocalTime.of(10, 0),
                         LocalTime.of(10, 30),
@@ -108,17 +136,21 @@ class AvailabilityServiceTest {
                 )
         );
 
-        when(availabilityRepository.findByTeacherId(1L)).thenReturn(slots);
+        when(availabilityRepository.findEntitiesByTeacherId(1L))
+                .thenReturn(slotEntities);
 
-        List<AvailabilitySlot> result = availabilityService.getTeacherAvailability(1L);
+        List<AvailabilitySlotResponse> result =
+                availabilityService.getTeacherAvailability(1L);
 
         assertNotNull(result);
         assertEquals(1, result.size());
+
+        assertEquals(1L, result.get(0).getId());
         assertEquals(LocalDate.of(2026, 3, 12), result.get(0).getDate());
         assertEquals(LocalTime.of(10, 0), result.get(0).getStartTime());
         assertEquals(LocalTime.of(10, 30), result.get(0).getEndTime());
         assertFalse(result.get(0).isBooked());
 
-        verify(availabilityRepository).findByTeacherId(1L);
+        verify(availabilityRepository).findEntitiesByTeacherId(1L);
     }
 }
