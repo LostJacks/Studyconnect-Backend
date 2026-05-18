@@ -34,8 +34,8 @@ public class TeacherController {
 
     @GetMapping("/available")
     public List<TeacherResponse> getAvailableTeachers(
-            @RequestParam LocalDate date,
-            @RequestParam LocalTime startTime) {
+            @RequestParam(required = false) LocalDate date,
+            @RequestParam(required = false) LocalTime startTime) {
 
         return teacherService.getAvailableTeachers(date, startTime);
     }

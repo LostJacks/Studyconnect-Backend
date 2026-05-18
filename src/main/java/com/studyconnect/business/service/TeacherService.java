@@ -45,12 +45,15 @@ public class TeacherService implements ITeacherService {
                 .stream()
                 .filter(user -> user.getRole().equals("TEACHER"))
                 .filter(user -> availabilityRepository
-                        .findByTeacherAndDate(user.getId(), date)
+                        .findByTeacherId(user.getId())
                         .stream()
-                        .anyMatch(slot ->
-                                slot.getStartTime().equals(startTime) &&
-                                        !slot.isBooked()
-                        )
+                        .anyMatch(slot -> {
+                            boolean matchesDate = date == null || slot.getDate().equals(date);
+                            boolean matchesTime = startTime == null || slot.getStartTime().equals(startTime);
+                            boolean isAvailable = !slot.isBooked();
+
+                            return matchesDate && matchesTime && isAvailable;
+                        })
                 )
                 .map(this::mapToTeacherResponse)
                 .collect(Collectors.toList());
