@@ -29,10 +29,7 @@ class JwtServiceTest {
 
     @Test
     void generateToken_validData_returnsToken() {
-        String token = jwtService.generateToken(
-                "jack@test.com",
-                "STUDENT"
-        );
+        String token = jwtService.generateToken("jack@test.com", "STUDENT");
 
         assertNotNull(token);
         assertFalse(token.isEmpty());
@@ -40,10 +37,7 @@ class JwtServiceTest {
 
     @Test
     void extractEmail_validToken_returnsEmail() {
-        String token = jwtService.generateToken(
-                "jack@test.com",
-                "STUDENT"
-        );
+        String token = jwtService.generateToken("jack@test.com", "STUDENT");
 
         String email = jwtService.extractEmail(token);
 
@@ -52,10 +46,7 @@ class JwtServiceTest {
 
     @Test
     void extractRole_validToken_returnsRole() {
-        String token = jwtService.generateToken(
-                "jack@test.com",
-                "TEACHER"
-        );
+        String token = jwtService.generateToken("jack@test.com", "TEACHER");
 
         String role = jwtService.extractRole(token);
 
@@ -64,27 +55,66 @@ class JwtServiceTest {
 
     @Test
     void isTokenValid_matchingEmail_returnsTrue() {
-        String token = jwtService.generateToken(
-                "jack@test.com",
-                "STUDENT"
-        );
+        String token = jwtService.generateToken("jack@test.com", "STUDENT");
 
-        boolean result =
-                jwtService.isTokenValid(token, "jack@test.com");
+        boolean result = jwtService.isTokenValid(token, "jack@test.com");
 
         assertTrue(result);
     }
 
     @Test
     void isTokenValid_wrongEmail_returnsFalse() {
-        String token = jwtService.generateToken(
-                "jack@test.com",
-                "STUDENT"
-        );
+        String token = jwtService.generateToken("jack@test.com", "STUDENT");
 
-        boolean result =
-                jwtService.isTokenValid(token, "other@test.com");
+        boolean result = jwtService.isTokenValid(token, "other@test.com");
 
         assertFalse(result);
+    }
+
+    @Test
+    void isTokenValid_expiredToken_returnsFalse() {
+        ReflectionTestUtils.setField(
+                jwtService,
+                "jwtExpiration",
+                -1000L
+        );
+
+        String token = jwtService.generateToken("jack@test.com", "STUDENT");
+
+        boolean result = jwtService.isTokenValid(token, "jack@test.com");
+
+        assertFalse(result);
+    }
+
+    @Test
+    void isTokenValid_invalidToken_returnsFalse() {
+        boolean result = jwtService.isTokenValid(
+                "invalid.token.value",
+                "jack@test.com"
+        );
+
+        assertFalse(result);
+    }
+
+    @Test
+    void extractEmail_invalidToken_throwsException() {
+        assertThrows(
+                Exception.class,
+                () -> jwtService.extractEmail("invalid.token.value")
+        );
+    }
+
+    @Test
+    void generateToken_invalidSecret_throwsException() {
+        ReflectionTestUtils.setField(
+                jwtService,
+                "secretKey",
+                "invalid"
+        );
+
+        assertThrows(
+                Exception.class,
+                () -> jwtService.generateToken("jack@test.com", "STUDENT")
+        );
     }
 }

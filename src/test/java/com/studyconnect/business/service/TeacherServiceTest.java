@@ -78,6 +78,52 @@ class TeacherServiceTest {
     }
 
     @Test
+    void getAvailableTeachers_nullDateAndMatchingTime_returnsTeacher() {
+        UserEntity teacher = new UserEntity(1L, "Teacher User", "teacher@test.com", "password", "TEACHER");
+
+        AvailabilitySlot slot = new AvailabilitySlot(
+                LocalDate.of(2026, 3, 20),
+                LocalTime.of(10, 0),
+                LocalTime.of(10, 30),
+                false
+        );
+
+        when(userRepository.findAll()).thenReturn(List.of(teacher));
+        when(availabilityRepository.findByTeacherId(1L)).thenReturn(List.of(slot));
+        when(skillRepository.findSkillsByTeacherId(1L)).thenReturn(List.of(new SkillResponse(1L, "Java")));
+
+        List<TeacherResponse> result = teacherService.getAvailableTeachers(
+                null,
+                LocalTime.of(10, 0)
+        );
+
+        assertEquals(1, result.size());
+    }
+
+    @Test
+    void getAvailableTeachers_matchingDateAndNullStartTime_returnsTeacher() {
+        UserEntity teacher = new UserEntity(1L, "Teacher User", "teacher@test.com", "password", "TEACHER");
+
+        AvailabilitySlot slot = new AvailabilitySlot(
+                LocalDate.of(2026, 3, 20),
+                LocalTime.of(10, 0),
+                LocalTime.of(10, 30),
+                false
+        );
+
+        when(userRepository.findAll()).thenReturn(List.of(teacher));
+        when(availabilityRepository.findByTeacherId(1L)).thenReturn(List.of(slot));
+        when(skillRepository.findSkillsByTeacherId(1L)).thenReturn(List.of(new SkillResponse(1L, "Java")));
+
+        List<TeacherResponse> result = teacherService.getAvailableTeachers(
+                LocalDate.of(2026, 3, 20),
+                null
+        );
+
+        assertEquals(1, result.size());
+    }
+
+    @Test
     void getAvailableTeachers_dateAndStartTimeMatch_returnsTeacher() {
         UserEntity teacher = new UserEntity(1L, "Teacher User", "teacher@test.com", "password", "TEACHER");
 

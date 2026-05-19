@@ -9,6 +9,8 @@ import com.studyconnect.domain.model.BookingStatus;
 import com.studyconnect.domain.model.Role;
 import com.studyconnect.domain.model.User;
 import com.studyconnect.presentation.dto.CreateBookingRequest;
+import com.studyconnect.presentation.dto.BookingSessionResponse;
+import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -39,6 +41,79 @@ class BookingServiceTest {
                 availabilityRepository,
                 userRepository
         );
+    }
+
+    @Test
+    void getBookingsByUser_acceptedPastBooking_marksCompleted() {
+        User user = new User(
+                "Student User",
+                "student@test.com",
+                "encodedPassword",
+                Role.STUDENT
+        );
+
+        BookingSessionResponse booking = new BookingSessionResponse(
+                1L,
+                2L,
+                "Student User",
+                10L,
+                "Teacher User",
+                5L,
+                LocalDate.now().minusDays(1),
+                LocalTime.of(10, 0),
+                LocalTime.of(10, 30),
+                "Help with math",
+                "Need help",
+                BookingStatus.ACCEPTED,
+                "student.png"
+        );
+
+        when(userRepository.findById(2L)).thenReturn(user);
+        when(bookingRepository.findBookingsByUserId(2L)).thenReturn(List.of(booking));
+
+        List<BookingSessionResponse> result = bookingService.getBookingsByUser(2L);
+
+        assertEquals(1, result.size());
+        assertEquals(BookingStatus.COMPLETED, result.get(0).getStatus());
+
+        verify(bookingRepository).updateStatus(1L, BookingStatus.COMPLETED);
+    }
+
+    @Test
+    void getBookingsByUser_validUser_returnsBookings() {
+        User user = new User(
+                "Student User",
+                "student@test.com",
+                "encodedPassword",
+                Role.STUDENT
+        );
+
+        BookingSessionResponse booking = new BookingSessionResponse(
+                1L,
+                2L,
+                "Student User",
+                10L,
+                "Teacher User",
+                5L,
+                LocalDate.now().plusDays(1),
+                LocalTime.of(10, 0),
+                LocalTime.of(10, 30),
+                "Help with math",
+                "Need help",
+                BookingStatus.PENDING,
+                "student.png"
+        );
+
+        when(userRepository.findById(2L)).thenReturn(user);
+        when(bookingRepository.findBookingsByUserId(2L)).thenReturn(List.of(booking));
+
+        List<BookingSessionResponse> result = bookingService.getBookingsByUser(2L);
+
+        assertEquals(1, result.size());
+        assertEquals(BookingStatus.PENDING, result.get(0).getStatus());
+
+        verify(bookingRepository).findBookingsByUserId(2L);
+        verify(bookingRepository, never()).updateStatus(any(), any());
     }
 
     @Test
@@ -458,6 +533,78 @@ class BookingServiceTest {
 
         verify(availabilityRepository, never()).updateBookedStatus(any(), anyBoolean());
         verify(bookingRepository, never()).updateStatus(any(), any());
+    }
+
+    @Test
+    void updateBookingStatus_slotIdDoesNotExist_throwsException() {
+        BookingRequest bookingRequest = new BookingRequest(
+                LocalTime.of(10, 0),
+                LocalTime.of(10, 30),
+                "Help with math",
+                "Need help"
+        );
+
+        when(bookingRepository.findById(1L)).thenReturn(bookingRequest);
+        when(bookingRepository.findSlotIdByBookingId(1L)).thenReturn(null);
+
+        IllegalArgumentException exception = assertThrows(
+                IllegalArgumentException.class,
+                () -> bookingService.updateBookingStatus(1L, 10L, BookingStatus.ACCEPTED)
+        );
+
+        assertEquals("Availability slot does not exist", exception.getMessage());
+
+        verify(availabilityRepository, never()).findById(any());
+    }
+
+    @Test
+    void updateBookingStatus_slotDoesNotExist_throwsException() {
+        BookingRequest bookingRequest = new BookingRequest(
+                LocalTime.of(10, 0),
+                LocalTime.of(10, 30),
+                "Help with math",
+                "Need help"
+        );
+
+        when(bookingRepository.findById(1L)).thenReturn(bookingRequest);
+        when(bookingRepository.findSlotIdByBookingId(1L)).thenReturn(5L);
+        when(availabilityRepository.findById(5L)).thenReturn(null);
+
+        IllegalArgumentException exception = assertThrows(
+                IllegalArgumentException.class,
+                () -> bookingService.updateBookingStatus(1L, 10L, BookingStatus.ACCEPTED)
+        );
+
+        assertEquals("Availability slot does not exist", exception.getMessage());
+    }
+
+    @Test
+    void updateBookingStatus_slotTeacherIdDoesNotExist_throwsException() {
+        BookingRequest bookingRequest = new BookingRequest(
+                LocalTime.of(10, 0),
+                LocalTime.of(10, 30),
+                "Help with math",
+                "Need help"
+        );
+
+        AvailabilitySlot slot = new AvailabilitySlot(
+                LocalDate.of(2026, 3, 20),
+                LocalTime.of(10, 0),
+                LocalTime.of(10, 30),
+                false
+        );
+
+        when(bookingRepository.findById(1L)).thenReturn(bookingRequest);
+        when(bookingRepository.findSlotIdByBookingId(1L)).thenReturn(5L);
+        when(availabilityRepository.findById(5L)).thenReturn(slot);
+        when(availabilityRepository.findTeacherIdBySlotId(5L)).thenReturn(null);
+
+        IllegalArgumentException exception = assertThrows(
+                IllegalArgumentException.class,
+                () -> bookingService.updateBookingStatus(1L, 10L, BookingStatus.ACCEPTED)
+        );
+
+        assertEquals("Availability slot does not exist", exception.getMessage());
     }
 
     @Test
