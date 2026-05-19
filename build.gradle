@@ -72,7 +72,7 @@ sonar {
 	properties {
 		property "sonar.projectKey", "StudyConnect"
 		property "sonar.host.url", "http://localhost:9000"
-		property "sonar.token", "sqp_143536377bf095540e2245a4f433d7e5405e1ddf"
+		property "sonar.token", "sqp_e3721b524af4e77b43ef00160676eb055547e0ff"
 
 		property "sonar.coverage.jacoco.xmlReportPaths",
 				"build/reports/jacoco/test/jacocoTestReport.xml"

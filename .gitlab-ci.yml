@@ -1,6 +1,7 @@
 stages:
   - build
   - test
+  - quality
   - package
   - deploy
 
@@ -22,12 +23,23 @@ test_backend:
   tags:
     - local
   script:
-    - .\gradlew.bat test --build-cache --no-daemon
+    - .\gradlew.bat clean test jacocoTestReport --build-cache --no-daemon
   artifacts:
     when: always
     paths:
       - build/reports/tests/test/
       - build/test-results/test/
+      - build/reports/jacoco/test/
+    expire_in: 3 months
+
+sonarqube_backend:
+  stage: quality
+  tags:
+    - local
+  script:
+    - .\gradlew.bat sonar --build-cache --no-daemon
+  dependencies:
+    - test_backend
 
 package_backend:
   stage: package
@@ -38,7 +50,7 @@ package_backend:
   artifacts:
     paths:
       - build/libs/*.jar
-    expire_in: 1 week
+    expire_in: 3 months
 
 deploy_backend:
   stage: deploy
