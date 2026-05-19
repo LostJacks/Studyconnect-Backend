@@ -23,28 +23,15 @@ public class AvailabilityService implements IAvailabilityService {
 
     @Override
     public List<AvailabilitySlot> createAvailability(CreateAvailabilityRequest request) {
-        if (!request.getStartTime().isBefore(request.getEndTime())) {
-            throw new IllegalArgumentException("Start time must be before end time");
-        }
-
-        long totalMinutes = Duration.between(request.getStartTime(), request.getEndTime()).toMinutes();
-
-        if (totalMinutes % 30 != 0) {
-            throw new IllegalArgumentException("Time range must be divisible into 30-minute slots");
-        }
+        validateTimeRange(request);
 
         List<AvailabilitySlot> createdSlots = new ArrayList<>();
-        LocalTime currentStart = request.getStartTime();
 
-        while (currentStart.isBefore(request.getEndTime())) {
-            LocalTime currentEnd = currentStart.plusMinutes(30);
+        for (LocalTime currentStart = request.getStartTime();
+             currentStart.isBefore(request.getEndTime());
+             currentStart = currentStart.plusMinutes(30)) {
 
-            AvailabilitySlot slot = new AvailabilitySlot(
-                    request.getDate(),
-                    currentStart,
-                    currentEnd,
-                    false
-            );
+            AvailabilitySlot slot = createSlot(request, currentStart);
 
             AvailabilitySlot savedSlot = availabilityRepository.saveForTeacher(
                     slot,
@@ -52,10 +39,33 @@ public class AvailabilityService implements IAvailabilityService {
             );
 
             createdSlots.add(savedSlot);
-            currentStart = currentEnd;
         }
 
         return createdSlots;
+    }
+
+    private void validateTimeRange(CreateAvailabilityRequest request) {
+        if (!request.getStartTime().isBefore(request.getEndTime())) {
+            throw new IllegalArgumentException("Start time must be before end time");
+        }
+
+        long totalMinutes = Duration.between(
+                request.getStartTime(),
+                request.getEndTime()
+        ).toMinutes();
+
+        if (totalMinutes % 30 != 0) {
+            throw new IllegalArgumentException("Time range must be divisible into 30-minute slots");
+        }
+    }
+
+    private AvailabilitySlot createSlot(CreateAvailabilityRequest request, LocalTime currentStart) {
+        return new AvailabilitySlot(
+                request.getDate(),
+                currentStart,
+                currentStart.plusMinutes(30),
+                false
+        );
     }
 
     @Override
