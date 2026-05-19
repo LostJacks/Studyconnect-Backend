@@ -27,6 +27,8 @@ test_backend:
   artifacts:
     when: always
     paths:
+      - build/classes/
+      - build/resources/
       - build/reports/tests/test/
       - build/test-results/test/
       - build/reports/jacoco/test/

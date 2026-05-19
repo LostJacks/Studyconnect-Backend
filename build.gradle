@@ -74,6 +74,8 @@ sonar {
 		property "sonar.host.url", "http://localhost:9000"
 		property "sonar.token", "sqp_e3721b524af4e77b43ef00160676eb055547e0ff"
 
+		property "sonar.java.binaries", "build/classes"
+
 		property "sonar.coverage.jacoco.xmlReportPaths",
 				"build/reports/jacoco/test/jacocoTestReport.xml"
 
