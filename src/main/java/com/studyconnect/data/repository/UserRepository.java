@@ -158,6 +158,44 @@ public class UserRepository implements IUserRepository {
 
         jdbcTemplate.update(sql, profileImageUrl, userId);
     }
+    @Override
+    public List<UserEntity> findTeachersPaged(int limit, int offset) {
+        String sql = """
+            SELECT id, name, email, password_hash, role, bio, profile_image_url
+            FROM users
+            WHERE role = 'TEACHER'
+            LIMIT ? OFFSET ?
+            """;
+
+        return jdbcTemplate.query(
+                sql,
+                (rs, rowNum) -> new UserEntity(
+                        rs.getLong(COLUMN_ID),
+                        rs.getString(COLUMN_NAME),
+                        rs.getString(COLUMN_EMAIL),
+                        rs.getString(COLUMN_PASSWORD_HASH),
+                        rs.getString(COLUMN_ROLE),
+                        rs.getString(COLUMN_BIO),
+                        null,
+                        rs.getString(COLUMN_PROFILE_IMAGE_URL)
+                ),
+                limit,
+                offset
+        );
+    }
+
+    @Override
+    public long countTeachers() {
+        String sql = """
+            SELECT COUNT(*)
+            FROM users
+            WHERE role = 'TEACHER'
+            """;
+
+        Long count = jdbcTemplate.queryForObject(sql, Long.class);
+
+        return count == null ? 0 : count;
+    }
 
     @Override
     public List<UserEntity> findAll() {
@@ -180,4 +218,5 @@ public class UserRepository implements IUserRepository {
                 )
         );
     }
+
 }

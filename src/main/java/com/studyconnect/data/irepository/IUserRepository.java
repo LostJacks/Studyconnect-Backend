@@ -16,5 +16,7 @@ public interface IUserRepository {
     void updateBio(Long userId, String bio);
     UserEntity findEntityByEmail(String email);
     void updateProfileImage(Long userId, String profileImageUrl);
+    List<UserEntity> findTeachersPaged(int limit, int offset);
+    long countTeachers();
 
 }

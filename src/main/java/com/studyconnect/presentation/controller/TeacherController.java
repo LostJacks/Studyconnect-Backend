@@ -4,6 +4,7 @@ import com.studyconnect.business.service.IAvailabilityService;
 import com.studyconnect.business.service.ITeacherService;
 import com.studyconnect.presentation.dto.AvailabilitySlotResponse;
 import com.studyconnect.presentation.dto.CompleteTeacherProfileRequest;
+import com.studyconnect.presentation.dto.PagedResponse;
 import com.studyconnect.presentation.dto.TeacherResponse;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
@@ -28,16 +29,20 @@ public class TeacherController {
     }
 
     @GetMapping
-    public List<TeacherResponse> getTeachers() {
-        return teacherService.getAllTeachers();
+    public PagedResponse<TeacherResponse> getTeachers(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "6") int size) {
+
+        return teacherService.getTeachers(page, size);
     }
 
     @GetMapping("/available")
     public List<TeacherResponse> getAvailableTeachers(
             @RequestParam(required = false) LocalDate date,
-            @RequestParam(required = false) LocalTime startTime) {
+            @RequestParam(required = false) LocalTime startTime,
+            @RequestParam(required = false) LocalTime endTime) {
 
-        return teacherService.getAvailableTeachers(date, startTime);
+        return teacherService.getAvailableTeachers(date, startTime, endTime);
     }
 
     @GetMapping("/{teacherId}/availability")

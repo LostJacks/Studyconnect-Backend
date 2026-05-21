@@ -78,7 +78,7 @@ class TeacherServiceTest {
     }
 
     @Test
-    void getAvailableTeachers_nullDateAndMatchingTime_returnsTeacher() {
+    void getAvailableTeachers_nullDateAndMatchingStartTime_returnsTeacher() {
         UserEntity teacher = new UserEntity(1L, "Teacher User", "teacher@test.com", "password", "TEACHER");
 
         AvailabilitySlot slot = new AvailabilitySlot(
@@ -94,7 +94,8 @@ class TeacherServiceTest {
 
         List<TeacherResponse> result = teacherService.getAvailableTeachers(
                 null,
-                LocalTime.of(10, 0)
+                LocalTime.of(10, 0),
+                null
         );
 
         assertEquals(1, result.size());
@@ -117,6 +118,7 @@ class TeacherServiceTest {
 
         List<TeacherResponse> result = teacherService.getAvailableTeachers(
                 LocalDate.of(2026, 3, 20),
+                null,
                 null
         );
 
@@ -124,7 +126,7 @@ class TeacherServiceTest {
     }
 
     @Test
-    void getAvailableTeachers_dateAndStartTimeMatch_returnsTeacher() {
+    void getAvailableTeachers_dateStartAndEndTimeMatch_returnsTeacher() {
         UserEntity teacher = new UserEntity(1L, "Teacher User", "teacher@test.com", "password", "TEACHER");
 
         AvailabilitySlot slot = new AvailabilitySlot(
@@ -142,7 +144,8 @@ class TeacherServiceTest {
 
         List<TeacherResponse> result = teacherService.getAvailableTeachers(
                 LocalDate.of(2026, 3, 20),
-                LocalTime.of(10, 0)
+                LocalTime.of(10, 0),
+                LocalTime.of(10, 30)
         );
 
         assertNotNull(result);
@@ -154,15 +157,44 @@ class TeacherServiceTest {
         verify(skillRepository).findSkillsByTeacherId(1L);
     }
 
+    @Test
+    void getAvailableTeachers_dateAndStartTimeMatchButEndTimeDifferent_returnsEmptyList() {
+        UserEntity teacher = new UserEntity(1L, "Teacher User", "teacher@test.com", "password", "TEACHER");
+
+        AvailabilitySlot slot = new AvailabilitySlot(
+                LocalDate.of(2026, 3, 20),
+                LocalTime.of(10, 0),
+                LocalTime.of(10, 30),
+                false
+        );
+
+        when(userRepository.findAll()).thenReturn(List.of(teacher));
+        when(availabilityRepository.findByTeacherId(1L)).thenReturn(List.of(slot));
+
+        List<TeacherResponse> result = teacherService.getAvailableTeachers(
+                LocalDate.of(2026, 3, 20),
+                LocalTime.of(10, 0),
+                LocalTime.of(11, 0)
+        );
+
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
+
+        verify(userRepository).findAll();
+        verify(availabilityRepository).findByTeacherId(1L);
+        verifyNoInteractions(skillRepository);
+    }
+
     @ParameterizedTest
     @CsvSource({
-            "2026-03-21,10:00,false",
-            "2026-03-20,11:00,false",
-            "2026-03-20,10:00,true"
+            "2026-03-21,10:00,10:30,false",
+            "2026-03-20,11:00,11:30,false",
+            "2026-03-20,10:00,10:30,true"
     })
     void getAvailableTeachers_noMatchingAvailableSlot_returnsEmptyList(
             LocalDate searchDate,
-            LocalTime searchTime,
+            LocalTime searchStartTime,
+            LocalTime searchEndTime,
             boolean booked
     ) {
         UserEntity teacher = new UserEntity(1L, "Teacher User", "teacher@test.com", "password", "TEACHER");
@@ -178,7 +210,11 @@ class TeacherServiceTest {
         when(availabilityRepository.findByTeacherId(1L)).thenReturn(List.of(slot));
 
         List<TeacherResponse> result =
-                teacherService.getAvailableTeachers(searchDate, searchTime);
+                teacherService.getAvailableTeachers(
+                        searchDate,
+                        searchStartTime,
+                        searchEndTime
+                );
 
         assertNotNull(result);
         assertTrue(result.isEmpty());
@@ -187,7 +223,6 @@ class TeacherServiceTest {
         verify(availabilityRepository).findByTeacherId(1L);
         verifyNoInteractions(skillRepository);
     }
-
 
     @Test
     void completeTeacherProfile_validRequest_updatesBioImageAndSkills() {

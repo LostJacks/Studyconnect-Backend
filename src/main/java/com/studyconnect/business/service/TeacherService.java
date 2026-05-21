@@ -5,6 +5,7 @@ import com.studyconnect.data.irepository.IAvailabilityRepository;
 import com.studyconnect.data.irepository.ISkillRepository;
 import com.studyconnect.data.irepository.IUserRepository;
 import com.studyconnect.presentation.dto.CompleteTeacherProfileRequest;
+import com.studyconnect.presentation.dto.PagedResponse;
 import com.studyconnect.presentation.dto.SkillResponse;
 import com.studyconnect.presentation.dto.TeacherResponse;
 import org.springframework.stereotype.Service;
@@ -41,7 +42,35 @@ public class TeacherService implements ITeacherService {
     }
 
     @Override
-    public List<TeacherResponse> getAvailableTeachers(LocalDate date, LocalTime startTime) {
+    public PagedResponse<TeacherResponse> getTeachers(int page, int size) {
+        validatePagination(page, size);
+
+        int offset = page * size;
+
+        List<TeacherResponse> teachers = userRepository.findTeachersPaged(size, offset)
+                .stream()
+                .map(this::mapToTeacherResponse)
+                .toList();
+
+        long totalItems = userRepository.countTeachers();
+        int totalPages = (int) Math.ceil((double) totalItems / size);
+
+        return new PagedResponse<>(
+                teachers,
+                page,
+                totalPages,
+                totalItems,
+                size
+        );
+    }
+
+    @Override
+    public List<TeacherResponse> getAvailableTeachers(
+            LocalDate date,
+            LocalTime startTime,
+            LocalTime endTime
+    ) {
+
         return userRepository.findAll()
                 .stream()
                 .filter(user -> ROLE_TEACHER.equals(user.getRole()))
@@ -49,11 +78,26 @@ public class TeacherService implements ITeacherService {
                         .findByTeacherId(user.getId())
                         .stream()
                         .anyMatch(slot -> {
-                            boolean matchesDate = date == null || slot.getDate().equals(date);
-                            boolean matchesTime = startTime == null || slot.getStartTime().equals(startTime);
-                            boolean isAvailable = !slot.isBooked();
 
-                            return matchesDate && matchesTime && isAvailable;
+                            boolean matchesDate =
+                                    date == null ||
+                                            slot.getDate().equals(date);
+
+                            boolean matchesStart =
+                                    startTime == null ||
+                                            slot.getStartTime().equals(startTime);
+
+                            boolean matchesEnd =
+                                    endTime == null ||
+                                            slot.getEndTime().equals(endTime);
+
+                            boolean isAvailable =
+                                    !slot.isBooked();
+
+                            return matchesDate
+                                    && matchesStart
+                                    && matchesEnd
+                                    && isAvailable;
                         })
                 )
                 .map(this::mapToTeacherResponse)
@@ -69,6 +113,16 @@ public class TeacherService implements ITeacherService {
 
         for (Long skillId : request.getSkillIds()) {
             skillRepository.addTeacherSkill(teacherId, skillId);
+        }
+    }
+
+    private void validatePagination(int page, int size) {
+        if (page < 0) {
+            throw new IllegalArgumentException("Page number cannot be negative");
+        }
+
+        if (size <= 0) {
+            throw new IllegalArgumentException("Page size must be greater than zero");
         }
     }
 
