@@ -19,6 +19,8 @@ public interface ITeacherService {
             CompleteTeacherProfileRequest request
     );
 
+    TeacherResponse getTeacherById(Long teacherId);
+
     List<TeacherResponse> getAvailableTeachers(
             LocalDate date,
             LocalTime startTime,

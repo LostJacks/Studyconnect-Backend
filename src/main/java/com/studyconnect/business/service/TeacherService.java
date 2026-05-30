@@ -105,6 +105,17 @@ public class TeacherService implements ITeacherService {
     }
 
     @Override
+    public TeacherResponse getTeacherById(Long teacherId) {
+        UserEntity teacher = userRepository.findEntityById(teacherId);
+
+        if (teacher == null || !ROLE_TEACHER.equals(teacher.getRole())) {
+            throw new IllegalArgumentException("Teacher not found");
+        }
+
+        return mapToTeacherResponse(teacher);
+    }
+
+    @Override
     public void completeTeacherProfile(Long teacherId, CompleteTeacherProfileRequest request) {
         userRepository.updateBio(teacherId, request.getBio());
         userRepository.updateProfileImage(teacherId, request.getProfileImageUrl());

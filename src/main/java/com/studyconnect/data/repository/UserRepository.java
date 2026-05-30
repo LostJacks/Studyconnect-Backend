@@ -185,6 +185,36 @@ public class UserRepository implements IUserRepository {
     }
 
     @Override
+    public UserEntity findEntityById(Long id) {
+        String sql = """
+            SELECT id, name, email, password_hash, role, bio, profile_image_url
+            FROM users
+            WHERE id = ?
+            """;
+
+        return jdbcTemplate.query(
+                sql,
+                rs -> {
+                    if (rs.next()) {
+                        return new UserEntity(
+                                rs.getLong(COLUMN_ID),
+                                rs.getString(COLUMN_NAME),
+                                rs.getString(COLUMN_EMAIL),
+                                rs.getString(COLUMN_PASSWORD_HASH),
+                                rs.getString(COLUMN_ROLE),
+                                rs.getString(COLUMN_BIO),
+                                null,
+                                rs.getString(COLUMN_PROFILE_IMAGE_URL)
+                        );
+                    }
+
+                    return null;
+                },
+                id
+        );
+    }
+
+    @Override
     public long countTeachers() {
         String sql = """
             SELECT COUNT(*)

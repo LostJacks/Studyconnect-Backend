@@ -12,6 +12,7 @@ public interface IUserRepository {
     User findById(Long id);
 
     List<UserEntity> findAll();
+    UserEntity findEntityById(Long id);
 
     void updateBio(Long userId, String bio);
     UserEntity findEntityByEmail(String email);

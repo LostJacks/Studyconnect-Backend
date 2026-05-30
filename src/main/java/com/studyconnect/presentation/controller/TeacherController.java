@@ -52,6 +52,11 @@ public class TeacherController {
         return availabilityService.getTeacherAvailability(teacherId);
     }
 
+    @GetMapping("/{teacherId}")
+    public TeacherResponse getTeacherById(@PathVariable Long teacherId) {
+        return teacherService.getTeacherById(teacherId);
+    }
+
     @PutMapping("/{teacherId}/profile")
     public ResponseEntity<Void> completeProfile(
             @PathVariable Long teacherId,

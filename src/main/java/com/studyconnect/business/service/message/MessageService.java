@@ -23,7 +23,11 @@ public class MessageService implements IMessageService {
         SessionChatEntity chat =
                 sessionChatRepository
                         .findByBookingId(bookingId)
-                        .orElseThrow();
+                        .orElseGet(() ->
+                                sessionChatRepository.save(
+                                        new SessionChatEntity(bookingId)
+                                )
+                        );
 
         return messageRepository
                 .findByChatIdOrderBySentAtAsc(chat.getId())
