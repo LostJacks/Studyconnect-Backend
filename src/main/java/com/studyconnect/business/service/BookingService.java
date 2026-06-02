@@ -126,10 +126,16 @@ public class BookingService implements IBookingService {
             throw new IllegalArgumentException("Availability slot does not exist");
         }
 
+
+
         AvailabilitySlot slot = availabilityRepository.findById(slotId);
 
         if (slot == null) {
             throw new IllegalArgumentException("Availability slot does not exist");
+        }
+
+        if (!slot.isAvailable()) {
+            throw new IllegalArgumentException("This slot is currently unavailable");
         }
 
         Long slotTeacherId = availabilityRepository.findTeacherIdBySlotId(slotId);

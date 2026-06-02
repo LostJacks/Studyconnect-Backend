@@ -15,4 +15,5 @@ public class AvailabilitySlotResponse {
     private LocalTime startTime;
     private LocalTime endTime;
     private boolean booked;
+    private boolean available;
 }

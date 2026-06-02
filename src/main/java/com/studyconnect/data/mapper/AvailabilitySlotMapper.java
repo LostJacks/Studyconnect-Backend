@@ -18,7 +18,8 @@ public class AvailabilitySlotMapper {
                 entity.getDate(),
                 entity.getStartTime(),
                 entity.getEndTime(),
-                entity.isBooked()
+                entity.isBooked(),
+                entity.isAvailable()
         );
     }
 
@@ -33,7 +34,8 @@ public class AvailabilitySlotMapper {
                 domain.getDate(),
                 domain.getStartTime(),
                 domain.getEndTime(),
-                domain.isBooked()
+                domain.isBooked(),
+                domain.isAvailable()
         );
     }
 }

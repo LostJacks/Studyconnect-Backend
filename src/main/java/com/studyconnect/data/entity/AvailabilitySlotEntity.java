@@ -16,4 +16,5 @@ public class AvailabilitySlotEntity {
     private LocalTime startTime;
     private LocalTime endTime;
     private boolean booked;
+    private boolean available;
 }

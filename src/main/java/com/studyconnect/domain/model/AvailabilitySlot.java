@@ -12,8 +12,15 @@ public class AvailabilitySlot {
     private final LocalTime startTime;
     private final LocalTime endTime;
     private boolean booked;
+    private boolean available;
 
-    public AvailabilitySlot(LocalDate date, LocalTime startTime, LocalTime endTime, boolean booked) {
+    public AvailabilitySlot(
+            LocalDate date,
+            LocalTime startTime,
+            LocalTime endTime,
+            boolean booked,
+            boolean available
+    ) {
         if (date == null) {
             throw new IllegalArgumentException("Date is required");
         }
@@ -30,6 +37,7 @@ public class AvailabilitySlot {
         this.startTime = startTime;
         this.endTime = endTime;
         this.booked = booked;
+        this.available = available;
     }
 
     public void markAsBooked() {
@@ -41,14 +49,26 @@ public class AvailabilitySlot {
     }
 
     public void markAsAvailable() {
-        if (!booked) {
-            throw new IllegalStateException("Availability slot is already available");
+        this.available = true;
+    }
+
+    public void markAsUnavailable() {
+        if (booked) {
+            throw new IllegalStateException("Booked slots cannot be made unavailable");
         }
 
-        this.booked = false;
+        this.available = false;
+    }
+
+    public void toggleAvailability() {
+        if (booked) {
+            throw new IllegalStateException("Booked slots cannot be modified");
+        }
+
+        this.available = !this.available;
     }
 
     public boolean isAvailable() {
-        return !booked;
+        return available && !booked;
     }
 }

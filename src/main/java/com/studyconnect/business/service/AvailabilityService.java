@@ -1,6 +1,5 @@
 package com.studyconnect.business.service;
 
-import com.studyconnect.data.entity.AvailabilitySlotEntity;
 import com.studyconnect.data.irepository.IAvailabilityRepository;
 import com.studyconnect.domain.model.AvailabilitySlot;
 import com.studyconnect.presentation.dto.AvailabilitySlotResponse;
@@ -64,7 +63,8 @@ public class AvailabilityService implements IAvailabilityService {
                 request.getDate(),
                 currentStart,
                 currentStart.plusMinutes(30),
-                false
+                false,
+                true
         );
     }
 
@@ -77,8 +77,24 @@ public class AvailabilityService implements IAvailabilityService {
                         entity.getDate(),
                         entity.getStartTime(),
                         entity.getEndTime(),
-                        entity.isBooked()
+                        entity.isBooked(),
+                        entity.isAvailable()
                 ))
                 .toList();
+    }
+
+    @Override
+    public void updateAvailabilityStatus(Long slotId, boolean available) {
+        AvailabilitySlot slot = availabilityRepository.findById(slotId);
+
+        if (slot == null) {
+            throw new IllegalArgumentException("Availability slot not found");
+        }
+
+        if (slot.isBooked()) {
+            throw new IllegalStateException("Booked slots cannot be changed");
+        }
+
+        availabilityRepository.updateAvailableStatus(slotId, available);
     }
 }

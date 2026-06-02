@@ -11,4 +11,6 @@ public interface IAvailabilityService {
     List<AvailabilitySlot> createAvailability(CreateAvailabilityRequest request);
 
     List<AvailabilitySlotResponse> getTeacherAvailability(Long teacherId);
+
+    void updateAvailabilityStatus(Long slotId, boolean available);
 }

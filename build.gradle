@@ -84,7 +84,6 @@ sonar {
 				"**/data/repository/**," +
 						"**/data/mapper/**," +
 						"**/configuration/**," +
-						"**/presentation/controller/**," +
 						"**/presentation/dto/**," +
 						"**/exceptions/**," +
 						"**/domain/model/Skill.java," +

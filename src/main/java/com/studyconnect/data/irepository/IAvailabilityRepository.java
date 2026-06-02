@@ -23,4 +23,6 @@ public interface IAvailabilityRepository {
     void markAsBooked(Long id);
 
     void updateBookedStatus(Long slotId, boolean booked);
+
+    void updateAvailableStatus(Long slotId, boolean available);
 }

@@ -24,8 +24,8 @@ public class AvailabilityRepository implements IAvailabilityRepository {
         AvailabilitySlotEntity entity = AvailabilitySlotMapper.toEntity(slot, teacherId);
 
         String sql = """
-                INSERT INTO availability_slot (teacher_id, date, start_time, end_time, booked)
-                VALUES (?, ?, ?, ?, ?)
+                INSERT INTO availability_slot (teacher_id, date, start_time, end_time, booked, available)
+                VALUES (?, ?, ?, ?, ?, ?)
                 """;
 
         jdbcTemplate.update(
@@ -34,7 +34,8 @@ public class AvailabilityRepository implements IAvailabilityRepository {
                 entity.getDate(),
                 entity.getStartTime(),
                 entity.getEndTime(),
-                entity.isBooked()
+                entity.isBooked(),
+                entity.isAvailable()
         );
 
         return slot;
@@ -43,10 +44,11 @@ public class AvailabilityRepository implements IAvailabilityRepository {
     @Override
     public List<AvailabilitySlot> findByTeacherId(Long teacherId) {
         String sql = """
-                SELECT id, teacher_id, date, start_time, end_time, booked
+                SELECT id, teacher_id, date, start_time, end_time, booked, available
                 FROM availability_slot
                 WHERE teacher_id = ?
                 AND booked = FALSE
+                AND available = TRUE
                 AND (
                     date > CURDATE()
                     OR (date = CURDATE() AND start_time > CURTIME())
@@ -68,7 +70,7 @@ public class AvailabilityRepository implements IAvailabilityRepository {
     @Override
     public List<AvailabilitySlotEntity> findEntitiesByTeacherId(Long teacherId) {
         String sql = """
-                SELECT id, teacher_id, date, start_time, end_time, booked
+                SELECT id, teacher_id, date, start_time, end_time, booked, available
                 FROM availability_slot
                 WHERE teacher_id = ?
                 AND booked = FALSE
@@ -89,7 +91,7 @@ public class AvailabilityRepository implements IAvailabilityRepository {
     @Override
     public AvailabilitySlot findById(Long id) {
         String sql = """
-                SELECT id, teacher_id, date, start_time, end_time, booked
+                SELECT id, teacher_id, date, start_time, end_time, booked, available
                 FROM availability_slot
                 WHERE id = ?
                 """;
@@ -111,11 +113,12 @@ public class AvailabilityRepository implements IAvailabilityRepository {
     @Override
     public List<AvailabilitySlot> findByTeacherAndDate(Long teacherId, LocalDate date) {
         String sql = """
-                SELECT id, teacher_id, date, start_time, end_time, booked
+                SELECT id, teacher_id, date, start_time, end_time, booked, available
                 FROM availability_slot
                 WHERE teacher_id = ?
                 AND date = ?
                 AND booked = FALSE
+                AND available = TRUE
                 AND (
                     date > CURDATE()
                     OR (date = CURDATE() AND start_time > CURTIME())
@@ -174,6 +177,17 @@ public class AvailabilityRepository implements IAvailabilityRepository {
         jdbcTemplate.update(sql, booked, slotId);
     }
 
+    @Override
+    public void updateAvailableStatus(Long slotId, boolean available) {
+        String sql = """
+                UPDATE availability_slot
+                SET available = ?
+                WHERE id = ?
+                """;
+
+        jdbcTemplate.update(sql, available, slotId);
+    }
+
     private AvailabilitySlotEntity mapRowToEntity(java.sql.ResultSet rs) throws java.sql.SQLException {
         return new AvailabilitySlotEntity(
                 rs.getLong("id"),
@@ -181,7 +195,8 @@ public class AvailabilityRepository implements IAvailabilityRepository {
                 rs.getDate("date").toLocalDate(),
                 rs.getTime("start_time").toLocalTime(),
                 rs.getTime("end_time").toLocalTime(),
-                rs.getBoolean("booked")
+                rs.getBoolean("booked"),
+                rs.getBoolean("available")
         );
     }
 }

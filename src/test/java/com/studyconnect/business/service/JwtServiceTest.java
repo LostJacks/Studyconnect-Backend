@@ -72,6 +72,22 @@ class JwtServiceTest {
     }
 
     @Test
+    void isTokenValid_nullToken_returnsFalse() {
+        boolean result = jwtService.isTokenValid(null, "jack@test.com");
+
+        assertFalse(result);
+    }
+
+    @Test
+    void isTokenValid_nullEmail_returnsFalse() {
+        String token = jwtService.generateToken("jack@test.com", "STUDENT");
+
+        boolean result = jwtService.isTokenValid(token, null);
+
+        assertFalse(result);
+    }
+
+    @Test
     void isTokenValid_expiredToken_returnsFalse() {
         ReflectionTestUtils.setField(
                 jwtService,
@@ -101,6 +117,14 @@ class JwtServiceTest {
         assertThrows(
                 Exception.class,
                 () -> jwtService.extractEmail("invalid.token.value")
+        );
+    }
+
+    @Test
+    void extractRole_invalidToken_throwsException() {
+        assertThrows(
+                Exception.class,
+                () -> jwtService.extractRole("invalid.token.value")
         );
     }
 
