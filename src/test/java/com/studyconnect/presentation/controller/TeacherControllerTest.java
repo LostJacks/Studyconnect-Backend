@@ -49,7 +49,13 @@ class TeacherControllerTest {
         LocalTime endTime = LocalTime.of(10, 30);
 
         List<TeacherResponse> response = List.of(
-                new TeacherResponse(1L, "Teacher User", "Bio", "image.png", List.of())
+                new TeacherResponse(
+                        1L,
+                        "Teacher User",
+                        "Bio",
+                        "image.png",
+                        List.of()
+                )
         );
 
         when(teacherService.getAvailableTeachers(date, startTime, endTime)).thenReturn(response);
@@ -69,7 +75,8 @@ class TeacherControllerTest {
                         LocalDate.of(2026, 5, 30),
                         LocalTime.of(10, 0),
                         LocalTime.of(10, 30),
-                        false
+                        false,
+                        true
                 )
         );
 
@@ -85,7 +92,13 @@ class TeacherControllerTest {
     @Test
     void getTeacherById_returnsTeacher() {
         TeacherResponse response =
-                new TeacherResponse(1L, "Teacher User", "Bio", "image.png", List.of());
+                new TeacherResponse(
+                        1L,
+                        "Teacher User",
+                        "Bio",
+                        "image.png",
+                        List.of()
+                );
 
         when(teacherService.getTeacherById(1L)).thenReturn(response);
 

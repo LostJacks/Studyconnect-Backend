@@ -131,7 +131,8 @@ class TeacherServiceTest {
                 LocalDate.of(2026, 3, 20),
                 LocalTime.of(10, 0),
                 LocalTime.of(10, 30),
-                false
+                false,
+                true
         );
 
         when(userRepository.findAll()).thenReturn(List.of(teacher));
@@ -151,7 +152,8 @@ class TeacherServiceTest {
                 LocalDate.of(2026, 3, 20),
                 LocalTime.of(10, 0),
                 LocalTime.of(10, 30),
-                false
+                false,
+                true
         );
 
         when(userRepository.findAll()).thenReturn(List.of(teacher));
@@ -171,7 +173,8 @@ class TeacherServiceTest {
                 LocalDate.of(2026, 3, 20),
                 LocalTime.of(10, 0),
                 LocalTime.of(10, 30),
-                false
+                false,
+                true
         );
 
         when(userRepository.findAll()).thenReturn(List.of(teacher));
@@ -196,7 +199,8 @@ class TeacherServiceTest {
                 LocalDate.of(2026, 3, 20),
                 LocalTime.of(10, 0),
                 LocalTime.of(10, 30),
-                false
+                false,
+                true
         );
 
         when(userRepository.findAll()).thenReturn(List.of(teacher));
@@ -231,7 +235,8 @@ class TeacherServiceTest {
                 LocalDate.of(2026, 3, 20),
                 LocalTime.of(10, 0),
                 LocalTime.of(10, 30),
-                booked
+                booked,
+                true
         );
 
         when(userRepository.findAll()).thenReturn(List.of(teacher));

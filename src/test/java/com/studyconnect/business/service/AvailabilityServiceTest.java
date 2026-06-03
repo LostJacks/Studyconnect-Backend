@@ -49,18 +49,22 @@ class AvailabilityServiceTest {
         assertEquals(LocalTime.of(10, 0), result.get(0).getStartTime());
         assertEquals(LocalTime.of(10, 30), result.get(0).getEndTime());
         assertFalse(result.get(0).isBooked());
+        assertTrue(result.get(0).isAvailable());
 
         assertEquals(LocalTime.of(10, 30), result.get(1).getStartTime());
         assertEquals(LocalTime.of(11, 0), result.get(1).getEndTime());
         assertFalse(result.get(1).isBooked());
+        assertTrue(result.get(1).isAvailable());
 
         assertEquals(LocalTime.of(11, 0), result.get(2).getStartTime());
         assertEquals(LocalTime.of(11, 30), result.get(2).getEndTime());
         assertFalse(result.get(2).isBooked());
+        assertTrue(result.get(2).isAvailable());
 
         assertEquals(LocalTime.of(11, 30), result.get(3).getStartTime());
         assertEquals(LocalTime.of(12, 0), result.get(3).getEndTime());
         assertFalse(result.get(3).isBooked());
+        assertTrue(result.get(3).isAvailable());
 
         verify(availabilityRepository, times(4))
                 .saveForTeacher(any(AvailabilitySlot.class), eq(1L));
@@ -103,7 +107,8 @@ class AvailabilityServiceTest {
                         LocalDate.of(2026, 3, 12),
                         LocalTime.of(10, 0),
                         LocalTime.of(10, 30),
-                        false
+                        false,
+                        true
                 )
         );
 
@@ -121,6 +126,7 @@ class AvailabilityServiceTest {
         assertEquals(LocalTime.of(10, 0), result.get(0).getStartTime());
         assertEquals(LocalTime.of(10, 30), result.get(0).getEndTime());
         assertFalse(result.get(0).isBooked());
+        assertTrue(result.get(0).isAvailable());
 
         verify(availabilityRepository).findEntitiesByTeacherId(1L);
     }

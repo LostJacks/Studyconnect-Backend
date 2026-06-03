@@ -15,7 +15,7 @@ class AvailabilitySlotTest {
 
     @Test
     void constructor_validData_createsAvailabilitySlot() {
-        AvailabilitySlot slot = new AvailabilitySlot(DATE, START_TIME, END_TIME, false);
+        AvailabilitySlot slot = new AvailabilitySlot(DATE, START_TIME, END_TIME, false, true);
 
         assertEquals(DATE, slot.getDate());
         assertEquals(START_TIME, slot.getStartTime());
@@ -26,7 +26,7 @@ class AvailabilitySlotTest {
 
     @Test
     void constructor_bookedTrue_createsBookedSlot() {
-        AvailabilitySlot slot = new AvailabilitySlot(DATE, START_TIME, END_TIME, true);
+        AvailabilitySlot slot = new AvailabilitySlot(DATE, START_TIME, END_TIME, true, false);
 
         assertTrue(slot.isBooked());
         assertFalse(slot.isAvailable());
@@ -36,7 +36,7 @@ class AvailabilitySlotTest {
     void constructor_nullDate_throwsException() {
         assertThrows(
                 IllegalArgumentException.class,
-                () -> new AvailabilitySlot(null, START_TIME, END_TIME, false)
+                () -> new AvailabilitySlot(null, START_TIME, END_TIME, false, true)
         );
     }
 
@@ -44,7 +44,7 @@ class AvailabilitySlotTest {
     void constructor_nullStartTime_throwsException() {
         assertThrows(
                 IllegalArgumentException.class,
-                () -> new AvailabilitySlot(DATE, null, END_TIME, false)
+                () -> new AvailabilitySlot(DATE, null, END_TIME, false, true)
         );
     }
 
@@ -52,7 +52,7 @@ class AvailabilitySlotTest {
     void constructor_nullEndTime_throwsException() {
         assertThrows(
                 IllegalArgumentException.class,
-                () -> new AvailabilitySlot(DATE, START_TIME, null, false)
+                () -> new AvailabilitySlot(DATE, START_TIME, null, false, true)
         );
     }
 
@@ -62,7 +62,7 @@ class AvailabilitySlotTest {
 
         assertThrows(
                 IllegalArgumentException.class,
-                () -> new AvailabilitySlot(DATE, invalidStartTime, END_TIME, false)
+                () -> new AvailabilitySlot(DATE, invalidStartTime, END_TIME, false, true)
         );
     }
 
@@ -70,13 +70,13 @@ class AvailabilitySlotTest {
     void constructor_startTimeEqualsEndTime_throwsException() {
         assertThrows(
                 IllegalArgumentException.class,
-                () -> new AvailabilitySlot(DATE, START_TIME, START_TIME, false)
+                () -> new AvailabilitySlot(DATE, START_TIME, START_TIME, false, true)
         );
     }
 
     @Test
-    void markAsBooked_whenAvailable_setsBookedToTrue() {
-        AvailabilitySlot slot = new AvailabilitySlot(DATE, START_TIME, END_TIME, false);
+    void markAsBooked_whenAvailable_setsBookedToTrueAndAvailableToFalse() {
+        AvailabilitySlot slot = new AvailabilitySlot(DATE, START_TIME, END_TIME, false, true);
 
         slot.markAsBooked();
 
@@ -86,14 +86,24 @@ class AvailabilitySlotTest {
 
     @Test
     void markAsBooked_whenAlreadyBooked_throwsException() {
-        AvailabilitySlot slot = new AvailabilitySlot(DATE, START_TIME, END_TIME, true);
+        AvailabilitySlot slot = new AvailabilitySlot(DATE, START_TIME, END_TIME, true, false);
 
         assertThrows(IllegalStateException.class, slot::markAsBooked);
     }
 
     @Test
-    void markAsAvailable_whenBooked_setsBookedToFalse() {
-        AvailabilitySlot slot = new AvailabilitySlot(DATE, START_TIME, END_TIME, true);
+    void markAsAvailable_whenBooked_throwsException() {
+        AvailabilitySlot slot = new AvailabilitySlot(DATE, START_TIME, END_TIME, true, false);
+
+        assertThrows(IllegalStateException.class, slot::markAsAvailable);
+
+        assertTrue(slot.isBooked());
+        assertFalse(slot.isAvailable());
+    }
+
+    @Test
+    void markAsAvailable_whenNotBooked_setsAvailableToTrue() {
+        AvailabilitySlot slot = new AvailabilitySlot(DATE, START_TIME, END_TIME, false, false);
 
         slot.markAsAvailable();
 
@@ -102,9 +112,12 @@ class AvailabilitySlotTest {
     }
 
     @Test
-    void markAsAvailable_whenAlreadyAvailable_throwsException() {
-        AvailabilitySlot slot = new AvailabilitySlot(DATE, START_TIME, END_TIME, false);
+    void markAsAvailable_whenAlreadyAvailable_keepsSlotAvailable() {
+        AvailabilitySlot slot = new AvailabilitySlot(DATE, START_TIME, END_TIME, false, true);
 
-        assertThrows(IllegalStateException.class, slot::markAsAvailable);
+        slot.markAsAvailable();
+
+        assertFalse(slot.isBooked());
+        assertTrue(slot.isAvailable());
     }
 }

@@ -46,9 +46,14 @@ public class AvailabilitySlot {
         }
 
         this.booked = true;
+        this.available = false;
     }
 
     public void markAsAvailable() {
+        if (booked) {
+            throw new IllegalStateException("Booked slots cannot be made available");
+        }
+
         this.available = true;
     }
 
