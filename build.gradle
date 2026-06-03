@@ -50,6 +50,7 @@ dependencies {
 	testImplementation 'org.springframework.security:spring-security-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
+
 jacoco {
 	toolVersion = "0.8.11"
 }
@@ -72,8 +73,8 @@ tasks.named('jacocoTestReport') {
 sonar {
 	properties {
 		property "sonar.projectKey", "StudyConnect"
-		property "sonar.host.url", "http://localhost:9000"
-		property "sonar.token", "sqp_e3721b524af4e77b43ef00160676eb055547e0ff"
+		property "sonar.host.url", System.getenv("SONAR_HOST_URL") ?: "http://localhost:9000"
+		property "sonar.token", System.getenv("SONAR_TOKEN")
 
 		property "sonar.java.binaries", "build/classes"
 
