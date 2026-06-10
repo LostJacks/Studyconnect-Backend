@@ -1,25 +1,76 @@
 stages:
   - build
   - test
+  - quality
+  - package
+  - deploy
 
-build:
+cache:
+  key: gradle-cache
+  paths:
+    - .gradle/wrapper/
+    - .gradle/caches/
+
+build_backend:
   stage: build
-  image: gradle:8.7-jdk17
+  tags:
+    - local
   script:
-    - chmod +x gradlew
-    - ./gradlew build -x test
-  artifacts:
-    paths:
-      - build/libs/
+    - .\gradlew.bat assemble --build-cache --no-daemon
 
-test:
+test_backend:
   stage: test
-  image: gradle:8.7-jdk17
+  tags:
+    - local
   script:
-    - chmod +x gradlew
-    - ./gradlew test
+    - .\gradlew.bat clean test jacocoTestReport --build-cache --no-daemon
   artifacts:
     when: always
     paths:
+      - build/classes/
+      - build/resources/
       - build/reports/tests/test/
       - build/test-results/test/
+      - build/reports/jacoco/test/
+    expire_in: 3 months
+
+sonarqube_backend:
+  stage: quality
+  tags:
+    - local
+  script:
+    - .\gradlew.bat sonar --build-cache --no-daemon
+  dependencies:
+    - test_backend
+
+package_backend:
+  stage: package
+  tags:
+    - local
+  script:
+    - .\gradlew.bat bootJar --build-cache --no-daemon
+  artifacts:
+    paths:
+      - build/libs/*.jar
+    expire_in: 3 months
+
+deploy_backend:
+  stage: deploy
+  tags:
+    - local
+  script:
+    - New-Item -ItemType Directory -Force -Path deploy
+    - $oldProcess = Get-CimInstance Win32_Process | Where-Object { $_.CommandLine -like '*studyconnect-backend.jar*' }
+    - if ($oldProcess) { $oldProcess | ForEach-Object { Stop-Process -Id $_.ProcessId -Force } }
+    - Copy-Item -Path build\libs\*.jar -Destination deploy\studyconnect-backend.jar -Force
+    - Start-Process -FilePath "java" -ArgumentList "-jar deploy\studyconnect-backend.jar" -WindowStyle Hidden
+    - Start-Sleep -Seconds 15
+    - Invoke-WebRequest -Uri http://localhost:8080/teachers -UseBasicParsing
+  dependencies:
+    - package_backend
+  artifacts:
+    paths:
+      - deploy/studyconnect-backend.jar
+    expire_in: 3 months
+  only:
+    - main

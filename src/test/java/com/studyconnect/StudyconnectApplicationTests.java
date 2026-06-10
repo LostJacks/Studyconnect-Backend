@@ -1,4 +1,4 @@
-package com.studyconnect.studyconnect;
+package com.studyconnect;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

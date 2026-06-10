@@ -1,10 +1,10 @@
-package com.studyconnect.studyconnect;
+package com.studyconnect;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class StudyconnectApplication {
+public class  StudyconnectApplication {
 
 	public static void main(String[] args) {
 		SpringApplication.run(StudyconnectApplication.class, args);
