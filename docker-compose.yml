@@ -1,6 +1,6 @@
 services:
   frontend:
-    image: jackfxng03/studyconnect:frontend
+    build: C:/Users/aweso/source/repos/StudyConnectFrontend
     container_name: studyconnect-frontend
     ports:
       - "5173:5173"
@@ -8,19 +8,11 @@ services:
       - backend
 
   backend:
-    image: jackfxng03/studyconnect:backend
+    build: .
     container_name: studyconnect-backend
     ports:
       - "8080:8080"
     environment:
       SPRING_DATASOURCE_URL: jdbc:mysql://ezp87k.h.filess.io:3306/StudyConnect_monthactmy
       SPRING_DATASOURCE_USERNAME: StudyConnect_monthactmy
-      SPRING_DATASOURCE_PASSWORD: your_filess_password
-      SPRING_JPA_SHOW_SQL: "false"
-      SPRING_JPA_OPEN_IN_VIEW: "false"
-
-  sonarqube:
-    image: sonarqube:latest
-    container_name: sonarqube
-    ports:
-      - "9000:9000"
+      SPRING_DATASOURCE_PASSWORD: YOUR_REAL_PASSWORD

@@ -1,6 +1,7 @@
 stages:
   - build
   - test
+  - e2e
   - quality
   - package
   - deploy
@@ -10,6 +11,7 @@ cache:
   paths:
     - .gradle/wrapper/
     - .gradle/caches/
+    - frontend/node_modules/
 
 build_backend:
   stage: build
@@ -33,6 +35,22 @@ test_backend:
       - build/test-results/test/
       - build/reports/jacoco/test/
     expire_in: 3 months
+
+e2e_frontend:
+  stage: e2e
+  tags:
+    - local
+  script:
+    - cd frontend
+    - npm install
+    - npm run test:e2e
+  artifacts:
+    when: always
+    paths:
+      - frontend/cypress/screenshots/
+      - frontend/cypress/videos/
+    expire_in: 3 months
+  allow_failure: true
 
 sonarqube_backend:
   stage: quality
@@ -59,10 +77,18 @@ deploy_backend:
   tags:
     - local
   script:
-    - if not exist deploy mkdir deploy
-    - copy build\libs\*.jar deploy\
-    - echo Backend jar copied to deploy folder
+    - New-Item -ItemType Directory -Force -Path deploy
+    - $oldProcess = Get-CimInstance Win32_Process | Where-Object { $_.CommandLine -like '*studyconnect-backend.jar*' }
+    - if ($oldProcess) { $oldProcess | ForEach-Object { Stop-Process -Id $_.ProcessId -Force } }
+    - Copy-Item -Path build\libs\*.jar -Destination deploy\studyconnect-backend.jar -Force
+    - Start-Process -FilePath "java" -ArgumentList "-jar deploy\studyconnect-backend.jar" -WindowStyle Hidden
+    - Start-Sleep -Seconds 15
+    - Invoke-WebRequest -Uri http://localhost:8080/teachers -UseBasicParsing
   dependencies:
     - package_backend
+  artifacts:
+    paths:
+      - deploy/studyconnect-backend.jar
+    expire_in: 3 months
   only:
     - main
