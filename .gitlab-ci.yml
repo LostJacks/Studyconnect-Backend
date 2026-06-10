@@ -59,18 +59,15 @@ deploy_backend:
   tags:
     - local
   script:
-    - New-Item -ItemType Directory -Force -Path deploy
-    - $oldProcess = Get-CimInstance Win32_Process | Where-Object { $_.CommandLine -like '*studyconnect-backend.jar*' }
-    - if ($oldProcess) { $oldProcess | ForEach-Object { Stop-Process -Id $_.ProcessId -Force } }
-    - Copy-Item -Path build\libs\*.jar -Destination deploy\studyconnect-backend.jar -Force
-    - Start-Process -FilePath "java" -ArgumentList "-jar deploy\studyconnect-backend.jar" -WindowStyle Hidden
-    - Start-Sleep -Seconds 15
-    - Invoke-WebRequest -Uri http://localhost:8080/teachers -UseBasicParsing
+    - docker stop studyconnect-backend; if ($LASTEXITCODE -ne 0) { Write-Host "No running backend container to stop" }
+    - docker rm studyconnect-backend; if ($LASTEXITCODE -ne 0) { Write-Host "No backend container to remove" }
+    - docker build -t studyconnect-backend .
+    - docker run -d -p 8080:8080 --name studyconnect-backend studyconnect-backend
+    - Start-Sleep -Seconds 20
+    - docker ps
+    - docker logs studyconnect-backend
   dependencies:
     - package_backend
-  artifacts:
-    paths:
-      - deploy/studyconnect-backend.jar
-    expire_in: 3 months
   only:
     - main
+    - feature/websocket-messaging
