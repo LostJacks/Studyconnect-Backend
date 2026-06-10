@@ -68,14 +68,7 @@ class AvailabilityIntegrationTest {
                 "11:00"
         );
 
-        String response = restClient()
-                .post()
-                .uri("/availability")
-                .contentType(MediaType.APPLICATION_JSON)
-                .header("Authorization", "Bearer " + teacher.token)
-                .body(request)
-                .retrieve()
-                .body(String.class);
+        String response = createAvailability(request, teacher.token);
 
         assertNotNull(response);
         assertTrue(response.contains("10:00"));
@@ -95,17 +88,21 @@ class AvailabilityIntegrationTest {
 
         HttpClientErrorException exception = assertThrows(
                 HttpClientErrorException.class,
-                () -> restClient()
-                        .post()
-                        .uri("/availability")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .header("Authorization", "Bearer " + teacher.token)
-                        .body(request)
-                        .retrieve()
-                        .body(String.class)
+                () -> createAvailability(request, teacher.token)
         );
 
         assertEquals(400, exception.getStatusCode().value());
+    }
+
+    private String createAvailability(CreateAvailabilityRequest request, String token) {
+        return restClient()
+                .post()
+                .uri("/availability")
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer " + token)
+                .body(request)
+                .retrieve()
+                .body(String.class);
     }
 
     static class TestTeacher {
