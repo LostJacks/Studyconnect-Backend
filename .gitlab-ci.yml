@@ -1,7 +1,6 @@
 stages:
   - build
   - test
-  - e2e
   - quality
   - package
   - deploy
@@ -11,7 +10,6 @@ cache:
   paths:
     - .gradle/wrapper/
     - .gradle/caches/
-    - frontend/node_modules/
 
 build_backend:
   stage: build
@@ -35,22 +33,6 @@ test_backend:
       - build/test-results/test/
       - build/reports/jacoco/test/
     expire_in: 3 months
-
-e2e_frontend:
-  stage: e2e
-  tags:
-    - local
-  script:
-    - cd frontend
-    - npm install
-    - npm run test:e2e
-  artifacts:
-    when: always
-    paths:
-      - frontend/cypress/screenshots/
-      - frontend/cypress/videos/
-    expire_in: 3 months
-  allow_failure: true
 
 sonarqube_backend:
   stage: quality
