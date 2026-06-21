@@ -34,13 +34,7 @@ class AuthIntegrationTest {
         request.setPassword("Password123");
         request.setRole(Role.TEACHER);
 
-        String response = restClient()
-                .post()
-                .uri("/auth/register")
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(request)
-                .retrieve()
-                .body(String.class);
+        String response = register(request);
 
         assertNotNull(response);
         assertTrue(response.contains("Auth Teacher"));
@@ -57,25 +51,13 @@ class AuthIntegrationTest {
         registerRequest.setPassword("Password123");
         registerRequest.setRole(Role.STUDENT);
 
-        restClient()
-                .post()
-                .uri("/auth/register")
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(registerRequest)
-                .retrieve()
-                .body(String.class);
+        register(registerRequest);
 
         LoginRequest loginRequest = new LoginRequest();
         loginRequest.setEmail(email);
         loginRequest.setPassword("Password123");
 
-        String loginResponse = restClient()
-                .post()
-                .uri("/auth/login")
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(loginRequest)
-                .retrieve()
-                .body(String.class);
+        String loginResponse = login(loginRequest);
 
         assertNotNull(loginResponse);
         assertTrue(loginResponse.contains("token"));
@@ -93,15 +75,29 @@ class AuthIntegrationTest {
 
         HttpClientErrorException exception = assertThrows(
                 HttpClientErrorException.class,
-                () -> restClient()
-                        .post()
-                        .uri("/auth/register")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .body(request)
-                        .retrieve()
-                        .body(String.class)
+                () -> register(request)
         );
 
         assertEquals(400, exception.getStatusCode().value());
+    }
+
+    private String register(RegisterRequest request) {
+        return restClient()
+                .post()
+                .uri("/auth/register")
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(request)
+                .retrieve()
+                .body(String.class);
+    }
+
+    private String login(LoginRequest request) {
+        return restClient()
+                .post()
+                .uri("/auth/login")
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(request)
+                .retrieve()
+                .body(String.class);
     }
 }

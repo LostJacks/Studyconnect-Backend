@@ -27,6 +27,7 @@ public class AuthService implements IAuthService {
     public AuthResponse register(RegisterRequest request) {
         String password = request.getPassword();
 
+
         if (!password.matches("^(?=.*[A-Z])(?=.*\\d).{6,}$")) {
             throw new IllegalArgumentException(
                     "Password must be at least 6 characters, contain 1 uppercase letter and 1 number"

@@ -149,9 +149,11 @@ public class BookingService implements IBookingService {
         }
 
         if (status == BookingStatus.ACCEPTED) {
+
             if (slot.isBooked()) {
                 throw new IllegalArgumentException("This slot is already booked");
             }
+
 
             bookingRequest.accept();
             availabilityRepository.updateBookedStatus(slotId, true);

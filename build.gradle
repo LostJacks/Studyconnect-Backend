@@ -73,8 +73,8 @@ tasks.named('jacocoTestReport') {
 sonar {
 	properties {
 		property "sonar.projectKey", "StudyConnect"
-		property "sonar.host.url", System.getenv("SONAR_HOST_URL") ?: "http://localhost:9000"
-		property "sonar.token", System.getenv("SONAR_TOKEN")
+		property "sonar.host.url", "http://localhost:9000"
+		property "sonar.token", "squ_e31ac9ff927d81a073c6b8da18e7c34bade71692"
 		property "sonar.java.binaries", "build/classes"
 
 		property "sonar.coverage.jacoco.xmlReportPaths",
