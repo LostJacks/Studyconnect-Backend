@@ -1,6 +1,6 @@
 services:
   frontend:
-    build: C:/Users/aweso/source/repos/StudyConnectFrontend
+    build: C:/Users/aweso/source/repos/studyconnect-frontendsa
     container_name: studyconnect-frontend
     ports:
       - "5173:5173"
@@ -15,4 +15,6 @@ services:
     environment:
       SPRING_DATASOURCE_URL: jdbc:mysql://ezp87k.h.filess.io:3306/StudyConnect_monthactmy
       SPRING_DATASOURCE_USERNAME: StudyConnect_monthactmy
-      SPRING_DATASOURCE_PASSWORD: YOUR_REAL_PASSWORD
+      SPRING_DATASOURCE_PASSWORD: 352f2b3e1e7e055ac8b1599d494f97358005ee28
+
+      ##
